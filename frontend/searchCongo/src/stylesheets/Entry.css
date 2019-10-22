@@ -1,26 +1,30 @@
-.Sale-page {
-  display: flex;
-  flex-direction: row;
-  font-size: calc(10px + 2vm);
-  color: white;
-}
-
 .Sale-info-column {
   display: flex;
   flex-direction: column;
-  padding-left: 10px;
-  padding-right: 10px;
+  flex-wrap: wrap;
+  text-align: left;
+  padding: 0px 40px;
+  min-width: 400px;
+  max-width: 800px;
 }
 
 .Buy-column {
   display: flex;
   flex-direction: column;
+  margin: 0px 40px;
 }
 
-.Container {
+.Sale-page {
   background-color: #282c34;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: left;
+  align-items: flex-start;
   min-height: 100vh;
-  text-align: left;
+  font-size: calc(10px + 2vm);
+  color: white;
+  text-align: center;
 }
 
 .myButton {

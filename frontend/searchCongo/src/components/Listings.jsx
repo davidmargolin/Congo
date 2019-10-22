@@ -34,19 +34,25 @@ function searchEntries(entries, searchWord) {
 
 function displayEntry(prop) {
   return (
-    <div>
-      <h1>{prop.title}</h1>
-      <img src={prop.image} alt="" width="auto" height="400"></img>
+    <div className="Entry-container">
+      <input
+        type="image"
+        src={prop.image}
+        alt=""
+        width="auto"
+        height="400"
+        onClick={e => {
+          //ROUTE TO NEW PAGE
+        }}
+      ></input>
+
       <p>
-        description: {prop.description}
-        <br></br>
-        sellerID: {prop.sellerID}
+        {prop.title}
         <br></br>
         Price: ${prop.price}
         <br></br>
         Quantity: {prop.quantity}
       </p>
-      <div className="Entry-divider" />
     </div>
   );
 }
@@ -106,7 +112,7 @@ class List extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <div className="Search-Header">
           <input
             type="text"
