@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Listing = ({ title, image, price }) => {
   return (
-    <Link to="/listing/abc">
+    <Link to={`/listing/${title}`}>
       <button
         style={{
           width: 300,
