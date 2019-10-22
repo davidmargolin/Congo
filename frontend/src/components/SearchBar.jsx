@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 
-const SearchBar = ({ onSubmit }) => {
+const SearchBar = ({ history }) => {
   const [query, setQuery] = useState("");
-
   return (
     <div
       style={{
@@ -34,7 +33,7 @@ const SearchBar = ({ onSubmit }) => {
         }}
         onKeyPress={e => {
           if (e.keyCode == 13 || e.which === 13) {
-            onSubmit(query);
+            history.push(`/search/${query}`);
           }
         }}
       />
@@ -42,4 +41,4 @@ const SearchBar = ({ onSubmit }) => {
   );
 };
 
-export default SearchBar;
+export default withRouter(SearchBar);

@@ -1,22 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import SearchResults from "./pages/SearchResultPage";
 import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 
 const App = () => {
-  const [query, setQuery] = useState("");
   return (
     <div>
       <Router>
-        <SearchBar onSubmit={newQuery => setQuery(newQuery)} />
+        <SearchBar />
 
         <Switch>
-          <Route path="/listing/:listingID">
+          <Route exact path="/listing/:listingID">
             <Listing />
           </Route>
-          <Route path="/">
-            <SearchResults query={query} />
+          <Route exact path="/search/:query">
+            <SearchResults />
+          </Route>
+          <Route exact path="/">
+            <SearchResults />
           </Route>
         </Switch>
       </Router>
