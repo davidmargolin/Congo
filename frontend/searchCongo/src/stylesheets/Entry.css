@@ -1,0 +1,53 @@
+.Sale-page {
+  display: flex;
+  flex-direction: row;
+  font-size: calc(10px + 2vm);
+  color: white;
+}
+
+.Sale-info-column {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.Buy-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.Container {
+  background-color: #282c34;
+  min-height: 100vh;
+  text-align: left;
+}
+
+.myButton {
+  color: rgb(255, 255, 255);
+  font-size: 24px;
+  line-height: 20px;
+  padding: 10px 60px;
+  border-radius: 0px;
+  font-family: Georgia, serif;
+  font-weight: normal;
+  text-decoration: none;
+  font-style: normal;
+  font-variant: normal;
+  text-transform: none;
+  background-image: linear-gradient(
+    to right,
+    rgb(28, 110, 164) 0%,
+    rgb(35, 136, 203) 50%,
+    rgb(20, 78, 117) 100%
+  );
+  box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px;
+  border: 2px solid rgb(28, 110, 164);
+  display: inline-block;
+}
+.myButton:hover {
+  background: #1c6ea4;
+}
+.myButton:active {
+  background: #144e75;
+}

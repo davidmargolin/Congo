@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./../App.css";
+import "./../stylesheets/Listings.css";
 
 /* To do
 
@@ -18,6 +18,7 @@ function makeEntry(title, description, image, sellerID, price, quantity) {
   };
 }
 
+//O(n) search time for every key press, will update when database exists
 function searchEntries(entries, searchWord) {
   let i = 0;
   let validEntries = [];
