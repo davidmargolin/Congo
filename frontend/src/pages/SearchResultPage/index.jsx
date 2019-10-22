@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import Listing from "../../components/Listing";
+import { useParams } from "react-router-dom";
 
 const listings = new Array(24).fill(undefined).map((_, index) => {
   return {
@@ -9,7 +10,9 @@ const listings = new Array(24).fill(undefined).map((_, index) => {
   };
 });
 
-const SearchResultPage = ({ query }) => {
+const SearchResultPage = () => {
+  const { query } = useParams();
+
   return (
     <div>
       <span
@@ -20,7 +23,7 @@ const SearchResultPage = ({ query }) => {
           flexDirection: "column"
         }}
       >
-        {query !== "" && (
+        {query && query.trim() !== "" && (
           <p style={{ marginLeft: 8 }}>Results for "{query}":</p>
         )}
 
