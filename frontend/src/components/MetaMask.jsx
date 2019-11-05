@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
+import CongoMarket from "./../../src/contracts/contracts/build/contracts/Congo.json";
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
@@ -8,12 +9,13 @@ const MetaMask = () => {
   const [productCount, setProductCount] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [marketState, setMarketState] = useState();
   */
 
   async function getWeb3() {
-    await loadWeb3();
-    //await loadBlockChainData();
+    if (await loadWeb3()) {
+      await loadBlockChainData();
+    }
   }
 
   useEffect(() => {
@@ -30,7 +32,9 @@ const MetaMask = () => {
       window.alert(
         "Non-Etherium browser detected. Consider MetaMask or some other Etherium browser extension!"
       );
+      return false;
     }
+    return true;
   }
 
   async function loadBlockChainData() {
@@ -39,6 +43,16 @@ const MetaMask = () => {
     const accounts = await web3.eth.getAccounts();
     //console.log(accounts);
     setAccount(accounts[0]);
+
+    const networkID = await web3.eth.net.getID();
+    const networkData = CongoMarket.networks[networkID];
+    if (networkData) {
+      const market = web3.eth.Contract(CongoMarket.abi, networkData.address);
+      //setMarketState(market);
+      //setLoading(false);
+    } else {
+      window.alert("Congo smart contract is not deployed to current network");
+    }
   }
 
   return <div>{account}</div>;
