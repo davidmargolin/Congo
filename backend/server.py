@@ -4,12 +4,24 @@ from threading import Thread
 import requests
 import time
 import json
+from pymongo import MongoClient
+import os
+
+
+username = os.environ['ATLASUSER']
+password = os.environ['ATLASPASS']
+
+
+client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
+
 
 DEV_NODE='http://localhost:7545'
 NODE_ADDRESS=DEV_NODE
-contract_address='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
+contract_address='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
 app=Flask(__name__)
+
 w3=Web3(HTTPProvider(NODE_ADDRESS))
+
 apiURL="https://api.etherscan.io/api?"
 apiKey="S4TBCHFSXQFMW43VZKB436H91PXFU4CPUN"
 
@@ -25,7 +37,6 @@ event_filter=w3.eth.filter({"address":contract_address})
 contract=w3.eth.contract(address=contract_address,abi=congo_abi)
 accounts=w3.eth.accounts
 
-
 def convertEvent(event):
     jsonStr = ""
     for key in event.args:
@@ -35,49 +46,78 @@ def convertEvent(event):
     jsonStr = "{" + jsonStr + "}"
     # print(jsonStr)
     # print(type(jsonStr))
-    return json.loads(jsonStr)
 
+    res = json.loads(jsonStr)
+    print(res)
+    return res;
 
 def print_event(event):
     res = convertEvent(event)
     print(res)
     print(type(res))
 
-def putNewProduct(event):
+def putNewProduct(event,coll):
     print("newly listed prod")
-    print_event(event)
+    # print_event(event)
+    newProduct = convertEvent(event)
+    print("creating new listing: ",newProduct['id'])
+    coll.insert_one(newProduct)
 
-def updateListing(event):
+def updateListing(event,coll):
     print("update listed prod")
-    print_event(event)
+    # print_event(event)
+    # find an listing
+    updatedListing = convertEvent(event)
+    print("incoming event: update listing",updatedListing)
+    # listing = coll.find_one({'id':updatedListing['id']})
+    print("updating listing id: ",updatedListing['id'])
+    coll.update_one({'id': updatedListing['id']},{
+        "$set": {
+            "quantity": updatedListing['quantity'],
+            "price": updatedListing['price'],
+            "details": updatedListing['details'],
+            "name": updatedListing['name']
+        }
+    })
 
-def putNewOrder(event):
+def putNewOrder(event,coll):
     print("new order")
     print_event(event)
+    newOrder = convertEvent(event)
+    coll.insert_one(newOrder)
 
-def updateOrder(event):
+def updateOrder(event,coll):
     print("updated order")
-    print_event(event)
+    updatedOrder = convertEvent(event)
+    print("updating order with id: ",updatedOrder['id'])
+    coll.update_one({'id': updatedOrder['id']},{
+        "$set": {
+            "quantity": updatedListing['quantity'],
+            "price": updatedListing['price'],
+            "details": updatedListing['details'],
+            "name": updatedListing['name']
+        }
+    })
 
 
-def log_loop(event_filter,poll_interval,event_type):
+def eventMap(event_filter,poll_interval,event_type,products,orders):
     print("started worker thread!")
     while True:
         if(event_type == "productListed"):
             for event in event_filter.get_new_entries():
-                putNewProduct(event)
+                putNewProduct(event,products)
             time.sleep(poll_interval)
         elif(event_type == "listingUpdated"):
             for event in event_filter.get_new_entries():
-                updateListing(event)
+                updateListing(event,products)
             time.sleep(poll_interval)
         elif(event_type == "orderCreated"):
             for event in event_filter.get_new_entries():
-                putNewOrder(event)
+                putNewOrder(event,orders)
             time.sleep(poll_interval)
         elif(event_type == "orderUpdated"):
             for event in event_filter.get_new_entries():
-                updateOrder(event)
+                updateOrder(event,orders)
             time.sleep(poll_interval)
 
 def queryNetwork(address,moduleType,actionType):
@@ -91,6 +131,20 @@ def queryNetwork(address,moduleType,actionType):
     response = r.json()
     return response
 
+def startWorkers(products,orders):
+    productListed_filter=contract.events.listingCreated.createFilter(fromBlock='latest')
+    listingUpdated_filter=contract.events.listingUpdated.createFilter(fromBlock='latest')
+    orderCreated_filter=contract.events.orderCreated.createFilter(fromBlock='latest')
+    orderUpdated_filter=contract.events.orderUpdated.createFilter(fromBlock='latest')
+    filters = {"productListed" :productListed_filter,
+               "listingUpdated":listingUpdated_filter,
+               "orderCreated":orderCreated_filter,  
+               "orderUpdated":orderUpdated_filter
+               }
+    for key in filters:
+        worker=Thread(target=eventMap,args=(filters[key],5,key,products,orders),daemon=True)
+        worker.start()
+
 @app.route('/')
 def hello_world():
     return 'Welcome to the backend!'
@@ -102,16 +156,13 @@ def search(itemText):
 
 
 if __name__ == '__main__':
-    productListed_filter=contract.events.productListed.createFilter(fromBlock='latest')
-    listingUpdated_filter=contract.events.listingUpdated.createFilter(fromBlock='latest')
-    orderCreated_filter=contract.events.orderCreated.createFilter(fromBlock='latest')
-    orderUpdated_filter=contract.events.orderUpdated.createFilter(fromBlock='latest')
-    filters = {"productListed" :productListed_filter,
-               "listingUpdated":listingUpdated_filter,
-               "orderCreated":orderCreated_filter,  
-               "orderUpdated":orderUpdated_filter
-               }
-    for key in filters:
-        worker=Thread(target=log_loop,args=(filters[key],5,key),daemon=True)
-        worker.start()
+    # try:
+    serverStatusResult = client.Congo.command("serverStatus")
+    products = client.Congo.products
+    orders = client.Congo.orders
+    startWorkers(products,orders);
+    print("Connected to Mongo Atlas:",serverStatusResult['host'])
+    # except:
+        # print("Failed to establish connection to DB")
+    
     app.run()
