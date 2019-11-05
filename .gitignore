@@ -3,3 +3,12 @@
 .env.local
 .env
 /virtual/
+frontend/.vscode/settings.json
+frontend/src/contracts/contracts/package-lock.json
+frontend/src/contracts/contracts/truffle-config.js
+frontend/src/contracts/contracts/build/contracts/Congo.json
+frontend/src/contracts/contracts/build/contracts/Migrations.json
+frontend/src/contracts/contracts/contracts/Congo.sol
+frontend/src/contracts/contracts/contracts/Migrations.sol
+frontend/src/contracts/contracts/migrations/1_initial_migration.js
+frontend/src/contracts/contracts/migrations/2_Congo_v1.js
