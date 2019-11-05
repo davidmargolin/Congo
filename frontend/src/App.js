@@ -3,10 +3,14 @@ import SearchResults from "./pages/SearchResultPage";
 import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
+<<<<<<< HEAD
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
 import "firebase/auth";
+=======
+import MetaMask from "./components/MetaMask";
+>>>>>>> Access to basic wallet information
 
 const App = () => {
   const [initialized, setInitialized] = useState(false);
@@ -42,6 +46,7 @@ const App = () => {
   return (
     <div>
       <Router>
+        <MetaMask />
         <SearchBar />
 
         <Switch>
