@@ -3,11 +3,13 @@ import SearchResults from "./pages/SearchResultPage";
 import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
+import MetaMask from "./components/MetaMask";
 
 const App = () => {
   return (
     <div>
       <Router>
+        <MetaMask />
         <SearchBar />
 
         <Switch>
