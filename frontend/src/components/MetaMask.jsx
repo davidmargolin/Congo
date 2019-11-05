@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
+<<<<<<< HEAD
 import CongoMarket from "./../../src/contracts/contracts/build/contracts/Congo.json";
+=======
+>>>>>>> Access to basic wallet information
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
@@ -9,6 +12,7 @@ const MetaMask = () => {
   const [productCount, setProductCount] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+<<<<<<< HEAD
   const [marketState, setMarketState] = useState();
   */
 
@@ -16,6 +20,14 @@ const MetaMask = () => {
     if (await loadWeb3()) {
       await loadBlockChainData();
     }
+=======
+
+  */
+
+  async function getWeb3() {
+    await loadWeb3();
+    //await loadBlockChainData();
+>>>>>>> Access to basic wallet information
   }
 
   useEffect(() => {
@@ -32,9 +44,13 @@ const MetaMask = () => {
       window.alert(
         "Non-Etherium browser detected. Consider MetaMask or some other Etherium browser extension!"
       );
+<<<<<<< HEAD
       return false;
     }
     return true;
+=======
+    }
+>>>>>>> Access to basic wallet information
   }
 
   async function loadBlockChainData() {
@@ -43,6 +59,7 @@ const MetaMask = () => {
     const accounts = await web3.eth.getAccounts();
     //console.log(accounts);
     setAccount(accounts[0]);
+<<<<<<< HEAD
 
     const networkID = await web3.eth.net.getID();
     const networkData = CongoMarket.networks[networkID];
@@ -53,6 +70,8 @@ const MetaMask = () => {
     } else {
       window.alert("Congo smart contract is not deployed to current network");
     }
+=======
+>>>>>>> Access to basic wallet information
   }
 
   return <div>{account}</div>;
