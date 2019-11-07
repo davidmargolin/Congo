@@ -2,10 +2,12 @@ from flask import Flask
 from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
+from requests.models import Response
 import time
 import json
 from pymongo import MongoClient
 import os
+from flask import request
 
 
 username = os.environ['ATLASUSER']
@@ -22,8 +24,6 @@ app=Flask(__name__)
 
 w3=Web3(HTTPProvider(NODE_ADDRESS))
 
-apiURL="https://api.etherscan.io/api?"
-apiKey="S4TBCHFSXQFMW43VZKB436H91PXFU4CPUN"
 
 # congo = await Congo.deployed()
 # updateItemTwo = await congo.updateListing(2,42,70,"details for item 2","item twoo!")
@@ -31,7 +31,6 @@ apiKey="S4TBCHFSXQFMW43VZKB436H91PXFU4CPUN"
 with open("../contracts/contracts/build/contracts/Congo.json") as f:
     info_json = json.load(f)
 congo_abi = info_json["abi"]
-# print(congo_abi)
 
 event_filter=w3.eth.filter({"address":contract_address})
 contract=w3.eth.contract(address=contract_address,abi=congo_abi)
@@ -44,9 +43,6 @@ def convertEvent(event):
         jsonStr += keyVal
     jsonStr = jsonStr[:-1]
     jsonStr = "{" + jsonStr + "}"
-    # print(jsonStr)
-    # print(type(jsonStr))
-
     res = json.loads(jsonStr)
     print(res)
     return res;
@@ -58,18 +54,15 @@ def print_event(event):
 
 def putNewProduct(event,coll):
     print("newly listed prod")
-    # print_event(event)
     newProduct = convertEvent(event)
     print("creating new listing: ",newProduct['id'])
     coll.insert_one(newProduct)
 
 def updateListing(event,coll):
     print("update listed prod")
-    # print_event(event)
     # find an listing
     updatedListing = convertEvent(event)
     print("incoming event: update listing",updatedListing)
-    # listing = coll.find_one({'id':updatedListing['id']})
     print("updating listing id: ",updatedListing['id'])
     coll.update_one({'id': updatedListing['id']},{
         "$set": {
@@ -130,6 +123,36 @@ def queryNetwork(address,moduleType,actionType):
     r = requests.get(url=apiURL,params=parameters)
     response = r.json()
     return response
+#builds a response for a listing query
+def queryListing(userQuery,coll):
+    listings = coll.find({"name":userQuery})
+    if listings is None:
+        print("no items were found with query:",userQuery)
+        return craftResponse(b'{"found":false}',204)
+    elif listings:
+        jsonStr = '{"listings":['
+        for listing in listings:
+            listing.pop('_id',None)
+            jsonStr += (json.dumps(listing)+',')
+        jsonStr = jsonStr[:-1]
+        jsonStr += ']}'
+        print(jsonStr)
+        jsonData = json.loads(jsonStr)
+        res = craftResponse(json.dumps(jsonData).encode(),200)
+        print(res)
+        return res
+    else:
+        return craftResponse(b'{"found":false}',204)
+    
+    
+
+def craftResponse(content,statusCode):
+    aResponse = Response()
+    aResponse.code = "expired"
+    aResponse.error_type = "expired"
+    aResponse.status_code = statusCode
+    aResponse._content = content
+    return aResponse.json()
 
 def startWorkers(products,orders):
     productListed_filter=contract.events.listingCreated.createFilter(fromBlock='latest')
@@ -149,20 +172,24 @@ def startWorkers(products,orders):
 def hello_world():
     return 'Welcome to the backend!'
 
-@app.route('/search/<itemText>')
-def search(itemText):
-    print("incomingitemquery:"+itemText)
-    return queryNetwork(itemText,"account","balance")
+@app.route('/search/<congoType>')
+def search(congoType):
+    print(congoType,request.args.get('searchTerm'))
+    if congoType == "orders":
+        print("search for orders")
+    elif congoType == "listings":  
+        if request.args.get('searchTerm') is None:
+            print("invalid search term")
+        else:
+            return queryListing(request.args.get('searchTerm'),products)
+    return craftResponse(b'{"status":"invalid search type or searchTerm"}',404)
 
 
 if __name__ == '__main__':
-    # try:
     serverStatusResult = client.Congo.command("serverStatus")
     products = client.Congo.products
     orders = client.Congo.orders
     startWorkers(products,orders);
     print("Connected to Mongo Atlas:",serverStatusResult['host'])
-    # except:
-        # print("Failed to establish connection to DB")
     
     app.run()
