@@ -17,36 +17,33 @@ const ListingPage = () => {
   const { listingID } = useParams();
 
   return (
-    <div>
-      <span
+    <span
+      style={{
+        display: "flex",
+        flex: 1,
+        alignItems: "center",
+        flexDirection: "column"
+      }}
+    >
+      <div
         style={{
+          flexDirection: "row",
           display: "flex",
-          flex: 1,
-          alignItems: "center",
-          flexDirection: "column"
+          flexWrap: "wrap",
+          maxWidth: 1500,
+          padding: 24,
+          justifyContent: "flex-start"
         }}
       >
-        <div
-          style={{
-            flexDirection: "row",
-            display: "flex",
-            display: "flex",
-            flexWrap: "wrap",
-            maxWidth: 1500,
-            padding: 24,
-            justifyContent: "flex-start"
-          }}
-        >
-          <img src={data.image} style={{ width: 400, height: 400 }} />
-          <br />
-          <div style={{ flex: 1, marginLeft: 40 }}>
-            <h3>Product {listingID}</h3>
-            <p>${data.price}</p>
-            <p>{data.description}</p>
-          </div>
+        <img src={data.image} style={{ width: 400, height: 400 }} />
+        <br />
+        <div style={{ flex: 1, marginLeft: 40 }}>
+          <h3>Product {listingID}</h3>
+          <p>${data.price}</p>
+          <p>{data.description}</p>
         </div>
-      </span>
-    </div>
+      </div>
+    </span>
   );
 };
 
