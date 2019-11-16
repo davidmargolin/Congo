@@ -23,7 +23,7 @@ orders = client.Congo.orders
 app=Flask(__name__)
 
 if (isProd):
-    CONTRACT_ADDRESS='0x8f1e4752c7f22C38fdFdb4214daBAba4df64Bb68'
+    CONTRACT_ADDRESS='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
 else:
     CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
@@ -33,48 +33,77 @@ else:
 with open("../contracts/contracts/build/contracts/Congo.json") as f:
     info_json = json.load(f)
     congo_abi = info_json["abi"]
-
-event_filter=w3.eth.filter({"address": CONTRACT_ADDRESS})
+    
 contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
 accounts=w3.eth.accounts
 
+def convertEvent(event):
+    jsonStr = ""
+    for key in event.args:
+        keyVal = '"' + key + '"'+ ": " + '"' + str(event.args[key]) + '"' + ','
+        jsonStr += keyVal
+    jsonStr = jsonStr[:-1]
+    jsonStr = "{" + jsonStr + "}"
+    res = json.loads(jsonStr)
+    print(res)
+    return res
+
+def print_event(event):
+    res = convertEvent(event)
+    print(res)
+    print(type(res))
+
 def putNewProduct(event):
-    print("creating new listing with id: ",event['id'])
-    products.insert_one(event)
+    newProduct = convertEvent(event)
+    print("creating new listing with id: ",newProduct['id'])
+    products.insert_one(newProduct)
 
 def updateListing(event):
     # find an listing
-    print("updating listing id: ",event['id'])
-    products.update_one({'id': event['id']},{
-        "$set": event
+    updatedListing = convertEvent(event)
+    print("updating listing id: ",updatedListing['id'])
+    products.update_one({'id': updatedListing['id']},{
+        "$set": {
+            "quantity": updatedListing['quantity'],
+            "price": updatedListing['price'],
+            "details": updatedListing['details'],
+            "name": updatedListing['name'],
+            "sellerContactDetails": updatedListing['sellerContactDetails']
+        }
     })
 
 def putNewOrder(event):    
-    orders.insert_one(event)
-    print("created new order with id:",event['orderID'])
+    newOrder = convertEvent(event)
+    orders.insert_one(newOrder)
+    print("created new order with id:",newOrder['orderID'])
 
 def updateOrder(event):
-    print("updating order with id: ",event['orderID'])
-    orders.update_one({'orderID': event['orderID']},{
-        "$set": event
+    updatedOrder = convertEvent(event)
+    print("updating order with id: ",updatedOrder['orderID'])
+    orders.update_one({'orderID': updatedOrder['orderID']},{
+        "$set": {
+            "orderStatus": updatedOrder['orderStatus']
+        }
     })
 
 
-def eventMap(event_filter,poll_interval,event_type):
+def eventMap(filters,poll_interval):
     print("started worker thread!")
     while True:
-        if(event_type == "productListed"):
-            for event in event_filter.get_new_entries():
-                putNewProduct(event)
-        elif(event_type == "listingUpdated"):
-            for event in event_filter.get_new_entries():
-                updateListing(event)
-        elif(event_type == "orderCreated"):
-            for event in event_filter.get_new_entries():
-                putNewOrder(event)
-        elif(event_type == "orderUpdated"):
-            for event in event_filter.get_new_entries():
-                updateOrder(event)
+        # check all filters for new events and then sleep
+        for key in filters:
+            if(key == "productListed"):
+                for event in filters[key].get_new_entries():
+                    putNewProduct(event)
+            elif(key == "listingUpdated"):
+                for event in filters[key].get_new_entries():
+                    updateListing(event)
+            elif(key == "orderCreated"):
+                for event in filters[key].get_new_entries():
+                    putNewOrder(event)
+            elif(key == "orderUpdated"):
+                for event in filters[key].get_new_entries():
+                    updateOrder(event)
         time.sleep(poll_interval)
 
 # returns all listings by name
@@ -99,9 +128,8 @@ def startWorkers():
         "orderCreated":contract.events.orderCreated.createFilter(fromBlock='latest'),  
         "orderUpdated":contract.events.orderUpdated.createFilter(fromBlock='latest')
     }
-    for key in filters:
-        worker=Thread(target=eventMap,args=(filters[key],5,key),daemon=True)
-        worker.start()
+    worker=Thread(target=eventMap,args=(filters,5),daemon=True)
+    worker.start()
 
 @app.route('/')
 def hello_world():
