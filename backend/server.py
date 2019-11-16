@@ -8,18 +8,21 @@ import json
 from pymongo import MongoClient
 import os
 from flask import request
+from flask import abort
+from dotenv import load_dotenv
+load_dotenv()
 
-
-username = os.environ['ATLASUSER']
-password = os.environ['ATLASPASS']
-
+username = os.getenv('ATLASUSER')
+password = os.getenv('ATLASPASS')
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
-
+products = client.Congo.products
+orders = client.Congo.orders
 
 DEV_NODE='http://localhost:7545'
 NODE_ADDRESS=DEV_NODE
-contract_address='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+
 app=Flask(__name__)
 
 w3=Web3(HTTPProvider(NODE_ADDRESS))
@@ -32,8 +35,8 @@ with open("../contracts/contracts/build/contracts/Congo.json") as f:
     info_json = json.load(f)
 congo_abi = info_json["abi"]
 
-event_filter=w3.eth.filter({"address":contract_address})
-contract=w3.eth.contract(address=contract_address,abi=congo_abi)
+event_filter=w3.eth.filter({"address":CONTRACT_ADDRESS})
+contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
 accounts=w3.eth.accounts
 
 def convertEvent(event):
@@ -45,26 +48,26 @@ def convertEvent(event):
     jsonStr = "{" + jsonStr + "}"
     res = json.loads(jsonStr)
     print(res)
-    return res;
+    return res
 
 def print_event(event):
     res = convertEvent(event)
     print(res)
     print(type(res))
 
-def putNewProduct(event,coll):
+def putNewProduct(event):
     print("newly listed prod")
     newProduct = convertEvent(event)
     print("creating new listing: ",newProduct['id'])
-    coll.insert_one(newProduct)
+    products.insert_one(newProduct)
 
-def updateListing(event,coll):
+def updateListing(event):
     print("update listed prod")
     # find an listing
     updatedListing = convertEvent(event)
     print("incoming event: update listing",updatedListing)
     print("updating listing id: ",updatedListing['id'])
-    coll.update_one({'id': updatedListing['id']},{
+    products.update_one({'id': updatedListing['id']},{
         "$set": {
             "quantity": updatedListing['quantity'],
             "price": updatedListing['price'],
@@ -73,123 +76,109 @@ def updateListing(event,coll):
         }
     })
 
-def putNewOrder(event,coll):
+def putNewOrder(event):
     print("new order")
     print_event(event)
     newOrder = convertEvent(event)
-    coll.insert_one(newOrder)
+    orders.insert_one(newOrder)
 
-def updateOrder(event,coll):
+def updateOrder(event):
     print("updated order")
     updatedOrder = convertEvent(event)
     print("updating order with id: ",updatedOrder['id'])
-    coll.update_one({'id': updatedOrder['id']},{
+    orders.update_one({'id': updatedOrder['id']},{
         "$set": {
-            "quantity": updatedListing['quantity'],
-            "price": updatedListing['price'],
-            "details": updatedListing['details'],
-            "name": updatedListing['name']
+            "quantity": updatedOrder['quantity'],
+            "price": updatedOrder['price'],
+            "details": updatedOrder['details'],
+            "name": updatedOrder['name']
         }
     })
 
 
-def eventMap(event_filter,poll_interval,event_type,products,orders):
+def eventMap(event_filter,poll_interval,event_type):
     print("started worker thread!")
     while True:
         if(event_type == "productListed"):
             for event in event_filter.get_new_entries():
-                putNewProduct(event,products)
-            time.sleep(poll_interval)
+                putNewProduct(event)
         elif(event_type == "listingUpdated"):
             for event in event_filter.get_new_entries():
-                updateListing(event,products)
-            time.sleep(poll_interval)
+                updateListing(event)
         elif(event_type == "orderCreated"):
             for event in event_filter.get_new_entries():
-                putNewOrder(event,orders)
-            time.sleep(poll_interval)
+                putNewOrder(event)
         elif(event_type == "orderUpdated"):
             for event in event_filter.get_new_entries():
-                updateOrder(event,orders)
-            time.sleep(poll_interval)
+                updateOrder(event)
+        time.sleep(poll_interval)
 
-def queryNetwork(address,moduleType,actionType):
-    parameters={
-        'module':moduleType,
-        'action':actionType,
-        'address':address,
-        'apikey':apiKey
+# returns all listings by name
+def queryListingsByName(name):
+    productResults = products.find({"name":name})
+    return list(productResults)
+    
+# returns all listings by email
+def queryListingsByEmail(email):
+    productResults = products.find({"sellerEmail":email})
+    return list(productResults)
+
+# returns all orders by email
+def queryOrdersByEmail(email):
+    orderResults = orders.find({"buyerEmail":email})
+    return list(orderResults)
+
+def startWorkers():
+    filters = {
+        "productListed" :contract.events.listingCreated.createFilter(fromBlock='latest'),
+        "listingUpdated":contract.events.listingUpdated.createFilter(fromBlock='latest'),
+        "orderCreated":contract.events.orderCreated.createFilter(fromBlock='latest'),  
+        "orderUpdated":contract.events.orderUpdated.createFilter(fromBlock='latest')
     }
-    r = requests.get(url=apiURL,params=parameters)
-    response = r.json()
-    return response
-#builds a response for a listing query
-def queryListing(userQuery,coll):
-    listings = coll.find({"name":userQuery})
-    if listings is None:
-        print("no items were found with query:",userQuery)
-        return craftResponse(b'{"found":false}',204)
-    elif listings:
-        jsonStr = '{"listings":['
-        for listing in listings:
-            listing.pop('_id',None)
-            jsonStr += (json.dumps(listing)+',')
-        jsonStr = jsonStr[:-1]
-        jsonStr += ']}'
-        print(jsonStr)
-        jsonData = json.loads(jsonStr)
-        res = craftResponse(json.dumps(jsonData).encode(),200)
-        print(res)
-        return res
-    else:
-        return craftResponse(b'{"found":false}',204)
-    
-    
-
-def craftResponse(content,statusCode):
-    aResponse = Response()
-    aResponse.code = "expired"
-    aResponse.error_type = "expired"
-    aResponse.status_code = statusCode
-    aResponse._content = content
-    return aResponse.json()
-
-def startWorkers(products,orders):
-    productListed_filter=contract.events.listingCreated.createFilter(fromBlock='latest')
-    listingUpdated_filter=contract.events.listingUpdated.createFilter(fromBlock='latest')
-    orderCreated_filter=contract.events.orderCreated.createFilter(fromBlock='latest')
-    orderUpdated_filter=contract.events.orderUpdated.createFilter(fromBlock='latest')
-    filters = {"productListed" :productListed_filter,
-               "listingUpdated":listingUpdated_filter,
-               "orderCreated":orderCreated_filter,  
-               "orderUpdated":orderUpdated_filter
-               }
     for key in filters:
-        worker=Thread(target=eventMap,args=(filters[key],5,key,products,orders),daemon=True)
+        worker=Thread(target=eventMap,args=(filters[key],5,key),daemon=True)
         worker.start()
 
 @app.route('/')
 def hello_world():
     return 'Welcome to the backend!'
 
-@app.route('/search/<congoType>')
-def search(congoType):
-    print(congoType,request.args.get('searchTerm'))
-    if congoType == "orders":
-        print("search for orders")
-    elif congoType == "listings":  
-        if request.args.get('searchTerm') is None:
-            print("invalid search term")
-        else:
-            return queryListing(request.args.get('searchTerm'),products)
-    return craftResponse(b'{"status":"invalid search type or searchTerm"}',404)
+# search listings by name
+@app.route('/search')
+def search():
+    query = request.args.get('query')
+    if query is not None:
+        return json.dumps(
+            {"results": queryListingsByName(query)}
+        )
+    else:
+        return abort(400)
 
+# get orders by email address
+@app.route('/user/orders')
+def userOrders():
+    email = request.args.get('email') 
+    if email is not None:
+        return json.dumps(
+            {"orders": queryOrdersByEmail(email)}
+        )
+    else:
+        return abort(400)
+
+# get listings by email address
+@app.route('/user/listings')
+def userListings():
+    email = request.args.get('email') 
+    if email is not None:
+        return json.dumps(
+            {"listings": queryListingsByEmail(email)}
+        )
+    else:
+        return abort(400)
 
 if __name__ == '__main__':
     serverStatusResult = client.Congo.command("serverStatus")
-    products = client.Congo.products
-    orders = client.Congo.orders
-    startWorkers(products,orders);
+    startWorkers()
     print("Connected to Mongo Atlas:",serverStatusResult['host'])
     
     app.run()
