@@ -4,6 +4,7 @@ import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
@@ -11,6 +12,15 @@ import "firebase/auth";
 =======
 import MetaMask from "./components/MetaMask";
 >>>>>>> Access to basic wallet information
+=======
+import MetaMask from "./components/MetaMask";
+=======
+import Account from "./pages/AccountPage";
+import Cart from "./pages/CartPage";
+import firebase from "firebase/app";
+import "firebase/auth";
+>>>>>>> cart
+>>>>>>> cart
 
 const App = () => {
   const [initialized, setInitialized] = useState(false);
