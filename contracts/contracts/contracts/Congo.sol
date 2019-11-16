@@ -39,7 +39,7 @@ contract Congo {
 		string details,
 		string name,
 		address payable owner,
-		string _sellerContactDetails
+		string sellerContactDetails
 	);
 	//event to be emitted when a listing is updated.
 	event listingUpdated(
@@ -54,7 +54,7 @@ contract Congo {
 	//event to be emitted when an order is updated.
 	event orderUpdated(
 		uint orderID,
-		State nextState
+		State orderStatus
 	);
 	//emit that an order has been created between the two parties
 	event orderCreated(
