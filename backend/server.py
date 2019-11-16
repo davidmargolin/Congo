@@ -21,15 +21,12 @@ orders = client.Congo.orders
 
 DEV_NODE='http://localhost:7545'
 NODE_ADDRESS=DEV_NODE
-CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+CONTRACT_ADDRESS='0x1F6748B877333B2bA9f18935E157005FCC4FE8bd'
 
 app=Flask(__name__)
 
 w3=Web3(HTTPProvider(NODE_ADDRESS))
 
-
-# congo = await Congo.deployed()
-# updateItemTwo = await congo.updateListing(2,42,70,"details for item 2","item twoo!")
 
 with open("../contracts/contracts/build/contracts/Congo.json") as f:
     info_json = json.load(f)
@@ -56,42 +53,36 @@ def print_event(event):
     print(type(res))
 
 def putNewProduct(event):
-    print("newly listed prod")
     newProduct = convertEvent(event)
-    print("creating new listing: ",newProduct['id'])
+    print("creating new listing with id: ",newProduct['id'])
     products.insert_one(newProduct)
 
 def updateListing(event):
-    print("update listed prod")
     # find an listing
     updatedListing = convertEvent(event)
-    print("incoming event: update listing",updatedListing)
     print("updating listing id: ",updatedListing['id'])
     products.update_one({'id': updatedListing['id']},{
         "$set": {
             "quantity": updatedListing['quantity'],
             "price": updatedListing['price'],
             "details": updatedListing['details'],
-            "name": updatedListing['name']
+            "name": updatedListing['name'],
+            "sellerContactDetails": updatedListing['sellerContactDetails']
         }
     })
 
 def putNewOrder(event):
-    print("new order")
-    print_event(event)
+    
     newOrder = convertEvent(event)
     orders.insert_one(newOrder)
+    print("created new order with id:",newOrder['orderID'])
 
 def updateOrder(event):
-    print("updated order")
     updatedOrder = convertEvent(event)
-    print("updating order with id: ",updatedOrder['id'])
-    orders.update_one({'id': updatedOrder['id']},{
+    print("updating order with id: ",updatedOrder['orderID'])
+    orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
-            "quantity": updatedOrder['quantity'],
-            "price": updatedOrder['price'],
-            "details": updatedOrder['details'],
-            "name": updatedOrder['name']
+            "orderStatus": updatedOrder['orderStatus']
         }
     })
 
@@ -120,12 +111,12 @@ def queryListingsByName(name):
     
 # returns all listings by email
 def queryListingsByEmail(email):
-    productResults = products.find({"sellerEmail":email})
+    productResults = products.find({"sellerContactDetails":email})
     return list(productResults)
 
 # returns all orders by email
 def queryOrdersByEmail(email):
-    orderResults = orders.find({"buyerEmail":email})
+    orderResults = orders.find({"buyerContactDetails":email})
     return list(orderResults)
 
 def startWorkers():
