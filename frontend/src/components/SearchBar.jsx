@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
+import account from "../assets/user.svg";
 import { Link, withRouter } from "react-router-dom";
 
 const SearchBar = ({ history }) => {
@@ -16,27 +17,41 @@ const SearchBar = ({ history }) => {
       }}
     >
       <Link to="/">
-        <img src={logo} style={{ height: 90, margin: 12 }} />
+        <img src={logo} style={{ height: 90, margin: 6 }} />
       </Link>
-      <input
-        type="text"
+      <div
         style={{
-          maxWidth: 1000,
-          height: 40,
-          flex: 1,
-          fontSize: 20,
-          padding: 12
+          display: "flex",
+          flexWrap: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          marginLeft: 20,
+          maxWidth: 800,
+          flex: 1
         }}
-        placeholder="Search for products..."
-        onChange={e => {
-          setQuery(e.target.value);
-        }}
-        onKeyPress={e => {
-          if (e.keyCode == 13 || e.which === 13) {
-            history.push(`/search/${query}`);
-          }
-        }}
-      />
+      >
+        <input
+          type="text"
+          style={{
+            height: 20,
+            flex: 1,
+            fontSize: 18,
+            padding: 12
+          }}
+          placeholder="Search for products..."
+          onChange={e => {
+            setQuery(e.target.value);
+          }}
+          onKeyPress={e => {
+            if (e.keyCode == 13 || e.which === 13) {
+              history.push(`/search/${query}`);
+            }
+          }}
+        />
+        <Link to="/account">
+          <img src={account} style={{ height: 50, margin: 12 }} />
+        </Link>
+      </div>
     </div>
   );
 };
