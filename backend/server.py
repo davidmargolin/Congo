@@ -14,76 +14,49 @@ load_dotenv()
 
 username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
+isProd = os.getenv('ENVIRONMENT') == "production"
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
 
-DEV_NODE='http://localhost:7545'
-NODE_ADDRESS=DEV_NODE
-CONTRACT_ADDRESS='0x1F6748B877333B2bA9f18935E157005FCC4FE8bd'
-
 app=Flask(__name__)
 
-w3=Web3(HTTPProvider(NODE_ADDRESS))
+if (isProd):
+    CONTRACT_ADDRESS='0x8f1e4752c7f22C38fdFdb4214daBAba4df64Bb68'
+    w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
+else:
+    CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+    w3=Web3(HTTPProvider('http://localhost:7545'))
 
 
 with open("../contracts/contracts/build/contracts/Congo.json") as f:
     info_json = json.load(f)
-congo_abi = info_json["abi"]
+    congo_abi = info_json["abi"]
 
-event_filter=w3.eth.filter({"address":CONTRACT_ADDRESS})
+event_filter=w3.eth.filter({"address": CONTRACT_ADDRESS})
 contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
 accounts=w3.eth.accounts
 
-def convertEvent(event):
-    jsonStr = ""
-    for key in event.args:
-        keyVal = '"' + key + '"'+ ": " + '"' + str(event.args[key]) + '"' + ','
-        jsonStr += keyVal
-    jsonStr = jsonStr[:-1]
-    jsonStr = "{" + jsonStr + "}"
-    res = json.loads(jsonStr)
-    print(res)
-    return res
-
-def print_event(event):
-    res = convertEvent(event)
-    print(res)
-    print(type(res))
-
 def putNewProduct(event):
-    newProduct = convertEvent(event)
-    print("creating new listing with id: ",newProduct['id'])
-    products.insert_one(newProduct)
+    print("creating new listing with id: ",event['id'])
+    products.insert_one(event)
 
 def updateListing(event):
     # find an listing
-    updatedListing = convertEvent(event)
-    print("updating listing id: ",updatedListing['id'])
-    products.update_one({'id': updatedListing['id']},{
-        "$set": {
-            "quantity": updatedListing['quantity'],
-            "price": updatedListing['price'],
-            "details": updatedListing['details'],
-            "name": updatedListing['name'],
-            "sellerContactDetails": updatedListing['sellerContactDetails']
-        }
+    print("updating listing id: ",event['id'])
+    products.update_one({'id': event['id']},{
+        "$set": event
     })
 
-def putNewOrder(event):
-    
-    newOrder = convertEvent(event)
-    orders.insert_one(newOrder)
-    print("created new order with id:",newOrder['orderID'])
+def putNewOrder(event):    
+    orders.insert_one(event)
+    print("created new order with id:",event['orderID'])
 
 def updateOrder(event):
-    updatedOrder = convertEvent(event)
-    print("updating order with id: ",updatedOrder['orderID'])
-    orders.update_one({'orderID': updatedOrder['orderID']},{
-        "$set": {
-            "orderStatus": updatedOrder['orderStatus']
-        }
+    print("updating order with id: ",event['orderID'])
+    orders.update_one({'orderID': event['orderID']},{
+        "$set": event
     })
 
 
