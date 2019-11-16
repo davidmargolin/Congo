@@ -29,7 +29,7 @@ If you want to connect to a localhost Web3 Provider, set the `ENVIRONMENT` var i
 
 Set `ENVIRONMENT` var in the `.env` file to `production` in order to connect to a Ropsten provider
 
-Confirm that the contract abi in `../contracts/contracts/build/contracts/Congo.json` matches the environment you are connecting to
+Confirm that the contract abi in `../contracts/contracts/build/contracts/Congo.json` matches the most recent contract version of environment you are connecting to
 
 ## Run
 
