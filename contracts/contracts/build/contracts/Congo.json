@@ -16595,6 +16595,180 @@
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
   "networks": {
+    "3": {
+      "events": {
+        "0x4fba91355208853de0dfeeab1906867ff6986ffa055d6af231de013a1a7282ae": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "details",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sellerContactDetails",
+              "type": "string"
+            }
+          ],
+          "name": "listingCreated",
+          "type": "event",
+          "signature": "0x4fba91355208853de0dfeeab1906867ff6986ffa055d6af231de013a1a7282ae"
+        },
+        "0x52e161ede9ab39b2da4f4a5a25e39d21ebb3e26fe08d44e4ad294aa85fff6862": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "details",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sellerContactDetails",
+              "type": "string"
+            }
+          ],
+          "name": "listingUpdated",
+          "type": "event",
+          "signature": "0x52e161ede9ab39b2da4f4a5a25e39d21ebb3e26fe08d44e4ad294aa85fff6862"
+        },
+        "0x5f1ed4d1c4bd2dbc03f9f80ac9ac30bb73c1d56762781ae27044bb72b5f99707": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "orderID",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "orderStatus",
+              "type": "uint8"
+            }
+          ],
+          "name": "orderUpdated",
+          "type": "event",
+          "signature": "0x5f1ed4d1c4bd2dbc03f9f80ac9ac30bb73c1d56762781ae27044bb72b5f99707"
+        },
+        "0x222a393215b1913680e04cacf6ab8787ca04ab6a8406b3a507106ed4bbdf9d8d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "orderID",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "prodID",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "total",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "prodName",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "buyerAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sellerAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "notes",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "sellerContactDetails",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "buyerContactDetails",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "orderStatus",
+              "type": "uint8"
+            }
+          ],
+          "name": "orderCreated",
+          "type": "event",
+          "signature": "0x222a393215b1913680e04cacf6ab8787ca04ab6a8406b3a507106ed4bbdf9d8d"
+        }
+      },
+      "links": {},
+      "address": "0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607",
+      "transactionHash": "0x9d18eccec1047792bcd2ec1a05200895253c29bcddb318dfa14a9ef5e4f06ddc"
+    },
     "5777": {
       "events": {
         "0x91c25cba591450f790c7dea430fa140068b856eae53fb712c13034e72f9b94eb": {
@@ -16966,7 +17140,7 @@
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-11-16T22:14:12.523Z",
+  "updatedAt": "2019-11-16T23:00:16.857Z",
   "devdoc": {
     "methods": {}
   },
