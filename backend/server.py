@@ -25,19 +25,19 @@ CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
 
 app=Flask(__name__)
 
-# w3=Web3(HTTPProvider(NODE_ADDRESS))
+w3=Web3(HTTPProvider(NODE_ADDRESS))
 
 
-# # congo = await Congo.deployed()
-# # updateItemTwo = await congo.updateListing(2,42,70,"details for item 2","item twoo!")
+# congo = await Congo.deployed()
+# updateItemTwo = await congo.updateListing(2,42,70,"details for item 2","item twoo!")
 
-# with open("../contracts/contracts/build/contracts/Congo.json") as f:
-#     info_json = json.load(f)
-# congo_abi = info_json["abi"]
+with open("../contracts/contracts/build/contracts/Congo.json") as f:
+    info_json = json.load(f)
+congo_abi = info_json["abi"]
 
-# event_filter=w3.eth.filter({"address":CONTRACT_ADDRESS})
-# contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
-# accounts=w3.eth.accounts
+event_filter=w3.eth.filter({"address":CONTRACT_ADDRESS})
+contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
+accounts=w3.eth.accounts
 
 def convertEvent(event):
     jsonStr = ""
@@ -178,7 +178,7 @@ def userListings():
 
 if __name__ == '__main__':
     serverStatusResult = client.Congo.command("serverStatus")
-    # startWorkers()
+    startWorkers()
     print("Connected to Mongo Atlas:",serverStatusResult['host'])
     
     app.run()
