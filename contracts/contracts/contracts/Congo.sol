@@ -17,6 +17,8 @@ contract Congo {
 		address payable buyerAddress;
 		address payable sellerAddress;
 		string notes;
+		string sellerContactDetails;
+		string buyerContactDetails;
 		State orderStatus;
 
 	}
@@ -27,6 +29,7 @@ contract Congo {
 		string details;
 		string name;
 		address payable owner;
+		string sellerContactDetails;
 	}
 	//event to be emitted when a new product is listed.
 	event listingCreated(
@@ -35,7 +38,8 @@ contract Congo {
 		uint256 price,
 		string details,
 		string name,
-		address payable owner
+		address payable owner,
+		string _sellerContactDetails
 	);
 	//event to be emitted when a listing is updated.
 	event listingUpdated(
@@ -44,7 +48,8 @@ contract Congo {
 		uint256 price,
 		string details,
 		string name,
-		address payable owner
+		address payable owner,
+		string sellerContactDetails
 	);
 	//event to be emitted when an order is updated.
 	event orderUpdated(
@@ -61,6 +66,8 @@ contract Congo {
 		address payable buyerAddress,
 		address payable sellerAddress,
 		string notes,
+		string sellerContactDetails,
+		string buyerContactDetails,
 		State orderStatus
 	);
 	constructor() public {
@@ -71,13 +78,16 @@ contract Congo {
 		uint _quantity,
 		uint256 _price,
 		string memory _details,
-		string memory _name)
+		string memory _name,
+		string memory _sellerContactDetails
+	)
 	public {
 		//validate user's input
 		require(bytes(_name).length > 0,"Product name cannot be empty.");
 		require(_price > 0, "Product Price must be greater than zero");
 		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(bytes(_details).length > 0, "Product Details are empty");
+		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
 		productCount++;
 		//using product count as an id for now.
 		products[productCount] = Product(
@@ -86,7 +96,8 @@ contract Congo {
 			_price,
 			_details,
 			_name,
-			msg.sender
+			msg.sender,
+			_sellerContactDetails
 		);
 		//broadcast to listeners that a new item has been listed.
 		emit listingCreated(
@@ -95,7 +106,8 @@ contract Congo {
 			_price,
 			_details,
 			_name,
-			msg.sender
+			msg.sender,
+			_sellerContactDetails
 		);
 
 	}
@@ -106,7 +118,9 @@ contract Congo {
 		uint _quantity,
 		uint256 _price,
 		string memory _details,
-		string memory _name)
+		string memory _name,
+		string memory _sellerContactDetails
+	)
 	public payable{
 		//validate user's input
 		require(bytes(_name).length > 0,"Product name cannot be empty.");
@@ -114,7 +128,7 @@ contract Congo {
 		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(_id <= productCount && _id > 0, "product id is invalid.");
-
+		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
 		//fetch the product.
 		Product memory _currentStateOfListing = products[_id];
 
@@ -127,6 +141,7 @@ contract Congo {
 		_currentStateOfListing.price = _price;
 		_currentStateOfListing.quantity = _quantity;
 		_currentStateOfListing.details = _details;
+		_currentStateOfListing.sellerContactDetails = _sellerContactDetails;
 
 		//update mapping on network
 		products[_id] = _currentStateOfListing;
@@ -138,7 +153,8 @@ contract Congo {
 			_price,
 			_details,
 			_name,
-			msg.sender
+			msg.sender,
+			_sellerContactDetails
 		);
 
 	}
@@ -147,12 +163,14 @@ contract Congo {
 	function createOrder(
 		uint _id,
 		uint _quantity,
-		string memory notes
+		string memory _notes,
+		string memory _buyerContactDetails
 	)
 	public payable{
 		//validate user's input
 		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(_id <= productCount && _id > 0, "product id is invalid.");
+		require(bytes(_buyerContactDetails).length > 0, "Buyer Contact Details are empty");
 
 		//get the product.
 		Product memory _listing = products[_id];
@@ -179,7 +197,9 @@ contract Congo {
 			_listing.name,
 			buyer,
 			seller,
-			notes,
+			_notes,
+			_listing.sellerContactDetails,
+			_buyerContactDetails,
 			State.Listed
 		);
 
@@ -194,7 +214,9 @@ contract Congo {
 			_listing.name,
 			buyer,
 			seller,
-			notes,
+			_notes,
+			_listing.sellerContactDetails,
+			_buyerContactDetails,
 			State.Listed
 		);
 	}
