@@ -34,7 +34,7 @@ Confirm that the contract abi in `../contracts/contracts/build/contracts/Congo.j
 ## Run
 
 ```bash
-python3 server.py
+python3 main.py
 ```
 
 The server will be available at `http://localhost:5000`
