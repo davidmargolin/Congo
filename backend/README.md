@@ -25,11 +25,10 @@ pip3 install -r requirements.txt
 
 ## Web3
 
-If you want to connect to a localhost Web3 Provider, set the `ENVIRONMENT` var in the `.env` file to `development`
+If you want to connect to a localhost Web3 Provider, set the `ENVIRONMENT` var in the `.env` file to `development`. Confirm that the contract abi in `../contracts/contracts/build/contracts/Congo.json` matches the abi of your locally deployed contract.
 
-Set `ENVIRONMENT` var in the `.env` file to `production` in order to connect to a Ropsten provider
+Set `ENVIRONMENT` var in the `.env` file to `production` in order to connect to a Ropsten provider. Make sure `./contract.json` is up to date with the last deployed Ropsten contract abi
 
-Confirm that the contract abi in `../contracts/contracts/build/contracts/Congo.json` matches the most recent contract version of environment you are connecting to
 
 ## Run
 
