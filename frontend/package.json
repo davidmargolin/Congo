@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
 <<<<<<< HEAD
+<<<<<<< HEAD
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
 =======
@@ -12,6 +13,12 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
 >>>>>>> cart
+=======
+    "firebase": "^7.4.0",
+    "firebaseui": "^4.3.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+>>>>>>> Added packages
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0",
     "react-web3": "^1.2.0",
