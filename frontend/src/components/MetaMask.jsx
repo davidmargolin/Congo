@@ -13,8 +13,12 @@ const MetaMask = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const [marketState, setMarketState] = useState();
+=======
+>>>>>>> Fixed calls to get information from browser wallet
   */
+  const [marketState, setMarketState] = useState();
 
   async function getWeb3() {
     if (await loadWeb3()) {
@@ -61,11 +65,15 @@ const MetaMask = () => {
     setAccount(accounts[0]);
 <<<<<<< HEAD
 
-    const networkID = await web3.eth.net.getID();
+    const networkID = await web3.eth.net.getId();
     const networkData = CongoMarket.networks[networkID];
     if (networkData) {
-      const market = web3.eth.Contract(CongoMarket.abi, networkData.address);
-      //setMarketState(market);
+      const market = new web3.eth.Contract(
+        CongoMarket.abi,
+        networkData.address
+      );
+
+      setMarketState(market);
       //setLoading(false);
     } else {
       window.alert("Congo smart contract is not deployed to current network");
