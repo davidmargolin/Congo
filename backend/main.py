@@ -1,14 +1,13 @@
-from flask import Flask
+from flask import Flask, request, abort, jsonify
 from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
 from requests.models import Response
+from bson.json_util import dumps
 import time
 import json
 from pymongo import MongoClient
 import os
-from flask import request
-from flask import abort
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -93,34 +92,35 @@ def eventMap(filters,poll_interval):
     while True:
         # check all filters for new events and then sleep
         for key in filters:
-            if(key == "productListed"):
-                for event in filters[key].get_new_entries():
+            for event in filters[key].get_new_entries():
+                if(key == "productListed"):
                     putNewProduct(event)
-            elif(key == "listingUpdated"):
-                for event in filters[key].get_new_entries():
+                elif(key == "listingUpdated"):
                     updateListing(event)
-            elif(key == "orderCreated"):
-                for event in filters[key].get_new_entries():
+                elif(key == "orderCreated"):
                     putNewOrder(event)
-            elif(key == "orderUpdated"):
-                for event in filters[key].get_new_entries():
+                elif(key == "orderUpdated"):
                     updateOrder(event)
         time.sleep(poll_interval)
+
+def dumpThenLoad(item):
+    dump = dumps(item)
+    return json.loads(dump)
 
 # returns all listings by name
 def queryListingsByName(name):
     productResults = products.find({"name":name})
-    return list(productResults)
+    return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by email
 def queryListingsByEmail(email):
     productResults = products.find({"sellerContactDetails":email})
-    return list(productResults)
+    return list(map(dumpThenLoad, list(productResults)))
 
 # returns all orders by email
 def queryOrdersByEmail(email):
     orderResults = orders.find({"buyerContactDetails":email})
-    return list(orderResults)
+    return list(map(dumpThenLoad, list(orderResults)))
 
 def startWorkers():
     filters = {
@@ -141,7 +141,7 @@ def hello_world():
 def search():
     query = request.args.get('query')
     if query is not None:
-        return json.dumps(
+        return jsonify(
             {"results": queryListingsByName(query)}
         )
     else:
@@ -152,7 +152,7 @@ def search():
 def userOrders():
     email = request.args.get('email') 
     if email is not None:
-        return json.dumps(
+        return jsonify(
             {"orders": queryOrdersByEmail(email)}
         )
     else:
@@ -163,7 +163,7 @@ def userOrders():
 def userListings():
     email = request.args.get('email') 
     if email is not None:
-        return json.dumps(
+        return jsonify(
             {"listings": queryListingsByEmail(email)}
         )
     else:
