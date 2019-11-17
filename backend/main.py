@@ -14,25 +14,27 @@ load_dotenv()
 
 username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
+isProd = os.getenv('ENVIRONMENT') == "production"
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
 
-DEV_NODE='http://localhost:7545'
-NODE_ADDRESS=DEV_NODE
-CONTRACT_ADDRESS='0x1F6748B877333B2bA9f18935E157005FCC4FE8bd'
-
 app=Flask(__name__)
 
-w3=Web3(HTTPProvider(NODE_ADDRESS))
-
-
-with open("../contracts/contracts/build/contracts/Congo.json") as f:
-    info_json = json.load(f)
-congo_abi = info_json["abi"]
-
-event_filter=w3.eth.filter({"address":CONTRACT_ADDRESS})
+if (isProd):
+    CONTRACT_ADDRESS='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
+    w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
+    with open("./contract.json") as f:
+        info_json = json.load(f)
+        congo_abi = info_json["abi"]
+else:
+    CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+    w3=Web3(HTTPProvider('http://localhost:7545'))
+    with open("../contracts/contracts/build/contracts/Congo.json") as f:
+        info_json = json.load(f)
+        congo_abi = info_json["abi"]
+    
 contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
 accounts=w3.eth.accounts
 
@@ -71,8 +73,7 @@ def updateListing(event):
         }
     })
 
-def putNewOrder(event):
-    
+def putNewOrder(event):    
     newOrder = convertEvent(event)
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
@@ -87,21 +88,23 @@ def updateOrder(event):
     })
 
 
-def eventMap(event_filter,poll_interval,event_type):
+def eventMap(filters,poll_interval):
     print("started worker thread!")
     while True:
-        if(event_type == "productListed"):
-            for event in event_filter.get_new_entries():
-                putNewProduct(event)
-        elif(event_type == "listingUpdated"):
-            for event in event_filter.get_new_entries():
-                updateListing(event)
-        elif(event_type == "orderCreated"):
-            for event in event_filter.get_new_entries():
-                putNewOrder(event)
-        elif(event_type == "orderUpdated"):
-            for event in event_filter.get_new_entries():
-                updateOrder(event)
+        # check all filters for new events and then sleep
+        for key in filters:
+            if(key == "productListed"):
+                for event in filters[key].get_new_entries():
+                    putNewProduct(event)
+            elif(key == "listingUpdated"):
+                for event in filters[key].get_new_entries():
+                    updateListing(event)
+            elif(key == "orderCreated"):
+                for event in filters[key].get_new_entries():
+                    putNewOrder(event)
+            elif(key == "orderUpdated"):
+                for event in filters[key].get_new_entries():
+                    updateOrder(event)
         time.sleep(poll_interval)
 
 # returns all listings by name
@@ -126,9 +129,8 @@ def startWorkers():
         "orderCreated":contract.events.orderCreated.createFilter(fromBlock='latest'),  
         "orderUpdated":contract.events.orderUpdated.createFilter(fromBlock='latest')
     }
-    for key in filters:
-        worker=Thread(target=eventMap,args=(filters[key],5,key),daemon=True)
-        worker.start()
+    worker=Thread(target=eventMap,args=(filters,5),daemon=True)
+    worker.start()
 
 @app.route('/')
 def hello_world():
