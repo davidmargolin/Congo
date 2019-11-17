@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
@@ -15,12 +16,18 @@ import MetaMask from "./components/MetaMask";
 =======
 import MetaMask from "./components/MetaMask";
 =======
+=======
+import MetaMask from "./components/MetaMask";
+>>>>>>> More rebasing fixes
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
 import "firebase/auth";
+<<<<<<< HEAD
 >>>>>>> cart
 >>>>>>> cart
+=======
+>>>>>>> More rebasing fixes
 
 const App = () => {
   const [initialized, setInitialized] = useState(false);
