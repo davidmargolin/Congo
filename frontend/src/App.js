@@ -4,13 +4,19 @@ import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import MetaMask from "./components/MetaMask";
 =======
+=======
+>>>>>>> Fixes to compile warnings and small fixes
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
 import "firebase/auth";
+<<<<<<< HEAD
 >>>>>>> cart
+=======
+>>>>>>> Fixes to compile warnings and small fixes
 
 const App = () => {
   const [initialized, setInitialized] = useState(false);
@@ -46,7 +52,10 @@ const App = () => {
   return (
     <div>
       <Router>
+<<<<<<< HEAD
         <MetaMask />
+=======
+>>>>>>> Fixes to compile warnings and small fixes
         <SearchBar />
 
         <Switch>

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import CongoMarket from "./../../src/contracts/contracts/build/contracts/Congo.json";
 =======
 >>>>>>> Access to basic wallet information
+=======
+import CongoMarket from "./src/contracts/contracts/build/contracts/Congo.json";
+>>>>>>> Fixes to compile warnings and small fixes
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
