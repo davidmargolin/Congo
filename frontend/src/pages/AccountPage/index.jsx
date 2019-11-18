@@ -67,7 +67,11 @@ const AccountPage = ({ user }) => {
               }}
               onClick={() => setTab("Orders")}
             >
-              <img src={orders} style={{ height: 30, marginRight: 12 }} />
+              <img
+                src={orders}
+                alt=""
+                style={{ height: 30, marginRight: 12 }}
+              />
               <span>View Orders</span>
             </div>
             <div
@@ -87,7 +91,11 @@ const AccountPage = ({ user }) => {
               }}
               onClick={() => setTab("Wallet")}
             >
-              <img src={wallet} style={{ height: 30, marginRight: 12 }} />
+              <img
+                src={wallet}
+                alt=""
+                style={{ height: 30, marginRight: 12 }}
+              />
               <span>Manage Wallet</span>
             </div>
             <div
@@ -107,7 +115,11 @@ const AccountPage = ({ user }) => {
                 padding: 12
               }}
             >
-              <img src={logOut} style={{ height: 30, marginRight: 12 }} />
+              <img
+                src={logOut}
+                alt=""
+                style={{ height: 30, marginRight: 12 }}
+              />
               <span>Log Out</span>
             </div>
           </div>

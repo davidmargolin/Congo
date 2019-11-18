@@ -35,7 +35,7 @@ const ListingPage = () => {
           justifyContent: "flex-start"
         }}
       >
-        <img src={data.image} style={{ width: 400, height: 400 }} />
+        <img src={data.image} alt="" style={{ width: 400, height: 400 }} />
         <br />
         <div style={{ flex: 1, marginLeft: 40 }}>
           <h3>Product {listingID}</h3>

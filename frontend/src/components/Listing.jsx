@@ -20,6 +20,7 @@ const Listing = ({ title, image, price }) => {
       >
         <img
           src={image}
+          alt=""
           style={{ width: "100%", height: 200, objectFit: "cover" }}
         />
         <h2 style={{ marginTop: 4, marginBottom: 4, fontSize: 14 }}>{title}</h2>

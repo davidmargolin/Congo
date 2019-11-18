@@ -17,7 +17,7 @@ const SearchBar = ({ history }) => {
       }}
     >
       <Link to="/">
-        <img src={logo} style={{ height: 90, margin: 6 }} />
+        <img src={logo} alt="" style={{ height: 90, margin: 6 }} />
       </Link>
       <div
         style={{
@@ -43,13 +43,13 @@ const SearchBar = ({ history }) => {
             setQuery(e.target.value);
           }}
           onKeyPress={e => {
-            if (e.keyCode == 13 || e.which === 13) {
+            if (e.keyCode === 13 || e.which === 13) {
               history.push(`/search/${query}`);
             }
           }}
         />
         <Link to="/account">
-          <img src={account} style={{ height: 50, margin: 12 }} />
+          <img src={account} alt="" style={{ height: 50, margin: 12 }} />
         </Link>
       </div>
     </div>

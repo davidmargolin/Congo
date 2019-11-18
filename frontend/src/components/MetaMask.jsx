@@ -3,6 +3,7 @@ import Web3 from "web3";
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import CongoMarket from "./../../src/contracts/contracts/build/contracts/Congo.json";
 =======
 >>>>>>> Access to basic wallet information
@@ -13,6 +14,10 @@ import CongoMarket from "./src/contracts/contracts/build/contracts/Congo.json";
 import CongoMarket from "./../contracts/contracts/build/contracts/Congo.json";
 import AddProduct from "./AddProduct.jsx";
 >>>>>>> Added general workings of adding products
+=======
+import CongoMarket from "./../contracts/contracts/build/contracts/Congo.json";
+import AddProduct from "./AddProduct.jsx";
+>>>>>>> 316d31835a6ae14be129f9b9d00f96a0b6a71776
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
