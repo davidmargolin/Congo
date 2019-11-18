@@ -2,12 +2,17 @@ import React, { useState, useEffect } from "react";
 import Web3 from "web3";
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import CongoMarket from "./../../src/contracts/contracts/build/contracts/Congo.json";
 =======
 >>>>>>> Access to basic wallet information
 =======
 import CongoMarket from "./src/contracts/contracts/build/contracts/Congo.json";
 >>>>>>> Fixed rebase errors in MetaMask.jsx
+=======
+import CongoMarket from "./../contracts/contracts/build/contracts/Congo.json";
+import AddProduct from "./AddProduct.jsx";
+>>>>>>> Added general workings of adding products
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
@@ -15,8 +20,8 @@ const MetaMask = () => {
   /*
   const [productCount, setProductCount] = useState(0);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   */
+  const [loading, setLoading] = useState(true);
   const [marketState, setMarketState] = useState();
 
   async function getWeb3() {
@@ -60,13 +65,38 @@ const MetaMask = () => {
       );
 
       setMarketState(market);
-      //setLoading(false);
+      setLoading(false);
     } else {
-      window.alert("Congo smart contract is not deployed to current network");
+      window.alert(
+        "The Congo smart contract is not deployed to the current network"
+      );
     }
   }
 
-  return <div>{account}</div>;
+  //NEED TO FIGURE OUT ID GENERATOR
+  function createProduct(name, price, quantity, description, email) {
+    setLoading(true);
+    const id = marketState.methods.productCount().call() + 1;
+    marketState.methods
+      .createProduct(id, price, description, email)
+      .send({ from: this.account })
+      .once("recipt", recipt => {
+        setLoading(false);
+      });
+  }
+
+  return (
+    <div>
+      {loading ? (
+        "Loading account information..."
+      ) : (
+        <div>
+          Wallet Address: {account}
+          <AddProduct createProduct={createProduct} />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MetaMask;
