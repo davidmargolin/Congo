@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Web3 from "web3";
-import CongoMarket from "./../contracts/contracts/build/contracts/Congo.json";
 
 const AddProduct = () => {
-  const [name, setName] = useState("fick");
+  const [name, setName] = useState();
   const [price, setPrice] = useState();
   const [quantity, setQuantity] = useState();
   const [description, setDescription] = useState();
@@ -87,8 +85,8 @@ const AddProduct = () => {
 
 export default AddProduct;
 
-/*
-
+/* Variables accessable in createProduct
+  createProduct
 		uint id,
 		uint quantity,
 		uint price,

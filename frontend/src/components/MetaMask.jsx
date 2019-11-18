@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
-import CongoMarket from "./src/contracts/contracts/build/contracts/Congo.json";
+import CongoMarket from "./../contracts/contracts/build/contracts/Congo.json";
 import AddProduct from "./AddProduct.jsx";
 
 const MetaMask = () => {
   const [account, setAccount] = useState("");
 
-  /*
   const [productCount, setProductCount] = useState(0);
-  const [products, setProducts] = useState([]);
-  */
+  //const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [marketState, setMarketState] = useState();
 
@@ -40,7 +38,7 @@ const MetaMask = () => {
 
   async function loadBlockChainData() {
     const web3 = window.web3;
-    //loads accoont information
+    //loads account information
     const accounts = await web3.eth.getAccounts();
     //console.log(accounts);
     setAccount(accounts[0]);
@@ -54,6 +52,10 @@ const MetaMask = () => {
       );
 
       setMarketState(market);
+      const count = await marketState.methods.productCount().call();
+      setProductCount(count);
+      console.log(count.toString());
+
       setLoading(false);
     } else {
       window.alert(
@@ -65,7 +67,8 @@ const MetaMask = () => {
   //NEED TO FIGURE OUT ID GENERATOR
   function createProduct(name, price, quantity, description, email) {
     setLoading(true);
-    const id = marketState.methods.productCount().call() + 1;
+    //TEMP ID GENERATOR
+    const id = productCount + 1;
     marketState.methods
       .createProduct(id, price, description, email)
       .send({ from: this.account })
