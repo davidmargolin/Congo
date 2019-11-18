@@ -12,3 +12,5 @@ frontend/src/contracts/contracts/contracts/Congo.sol
 frontend/src/contracts/contracts/contracts/Migrations.sol
 frontend/src/contracts/contracts/migrations/1_initial_migration.js
 frontend/src/contracts/contracts/migrations/2_Congo_v1.js
+contracts/contracts/build/contracts/Congo.json
+contracts/contracts/build/contracts/Migrations.json
