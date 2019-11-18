@@ -3,38 +3,11 @@ import SearchResults from "./pages/SearchResultPage";
 import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
 import firebase from "firebase/app";
 import "firebase/auth";
-=======
 import MetaMask from "./components/MetaMask";
->>>>>>> Access to basic wallet information
-=======
-import MetaMask from "./components/MetaMask";
-=======
-=======
-import MetaMask from "./components/MetaMask";
->>>>>>> More rebasing fixes
-=======
-import MetaMask from "./components/MetaMask";
->>>>>>> 316d31835a6ae14be129f9b9d00f96a0b6a71776
-import Account from "./pages/AccountPage";
-import Cart from "./pages/CartPage";
-import firebase from "firebase/app";
-import "firebase/auth";
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> cart
->>>>>>> cart
-=======
->>>>>>> More rebasing fixes
-=======
->>>>>>> 316d31835a6ae14be129f9b9d00f96a0b6a71776
 
 const App = () => {
   const [initialized, setInitialized] = useState(false);

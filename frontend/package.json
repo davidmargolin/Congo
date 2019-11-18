@@ -3,47 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 316d31835a6ae14be129f9b9d00f96a0b6a71776
     "firebase": "^7.2.2",
     "firebaseui": "^4.2.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
-=======
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
->>>>>>> Access to basic wallet information
-=======
-=======
->>>>>>> Added packages
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
-=======
-=======
->>>>>>> More rebasing fixes
-    "firebase": "^7.2.2",
-    "firebaseui": "^4.2.0",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
-<<<<<<< HEAD
->>>>>>> cart
-<<<<<<< HEAD
->>>>>>> cart
-=======
-=======
-    "firebase": "^7.4.0",
-    "firebaseui": "^4.3.0",
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
->>>>>>> Added packages
->>>>>>> Added packages
-=======
->>>>>>> More rebasing fixes
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0"
   },
