@@ -1,4 +1,5 @@
 from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
@@ -8,6 +9,7 @@ import time
 import json
 from pymongo import MongoClient
 import os
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -20,6 +22,7 @@ products = client.Congo.products
 orders = client.Congo.orders
 
 app=Flask(__name__)
+CORS(app)
 
 if (isProd):
     CONTRACT_ADDRESS='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
@@ -107,9 +110,16 @@ def dumpThenLoad(item):
     dump = dumps(item)
     return json.loads(dump)
 
+# returns first listing with a matching id
+def queryListingById(id):
+    listing = products.find_one({"id": id})
+    return dumpThenLoad(listing)
+    
+
 # returns all listings by name
 def queryListingsByName(name):
-    productResults = products.find({"name":name})
+    regx = re.compile(name, re.I)
+    productResults = products.find({"name": regx}).limit(20)
     return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by email
@@ -135,6 +145,16 @@ def startWorkers():
 @app.route('/')
 def hello_world():
     return 'Welcome to the backend!'
+
+# get listing by id
+@app.route('/listing/<listingId>')
+def getListing(listingId):
+    if listingId is not None:
+        return jsonify(
+            queryListingById(listingId)
+        )
+    else:
+        return abort(400)
 
 # search listings by name
 @app.route('/search')

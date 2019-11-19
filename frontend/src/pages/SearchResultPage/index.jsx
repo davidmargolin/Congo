@@ -1,18 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Listing from "../../components/Listing";
 import { useParams } from "react-router-dom";
 
-const listings = new Array(24).fill(undefined).map((_, index) => {
-  return {
-    title: `Item ${index}`,
-    image: "https://via.placeholder.com/400",
-    price: 30
-  };
-});
+// const listings = new Array(24).fill(undefined).map((_, index) => {
+//   return {
+//     title: `Item ${index}`,
+//     image: "https://via.placeholder.com/400",
+//     price: 30
+//   };
+// });
+
+const getSearchResults = query =>
+  fetch(
+    `https://congo-mart.herokuapp.com/search?query=${encodeURIComponent(query)}`
+  ).then(res => res.json());
 
 const SearchResultPage = () => {
   const { query } = useParams();
-
+  const [listings, setListings] = useState([]);
+  useEffect(() => {
+    getSearchResults(query || "").then(({ results }) => {
+      setListings(results);
+    });
+  }, [query]);
   return (
     <span
       style={{
@@ -35,8 +45,8 @@ const SearchResultPage = () => {
           justifyContent: "center"
         }}
       >
-        {listings.map(({ title, image, price }) => (
-          <Listing title={title} image={image} price={price} />
+        {listings.map(({ name, image, price, id }) => (
+          <Listing title={name} image={image} price={price} id={id} />
         ))}
       </div>
     </span>
