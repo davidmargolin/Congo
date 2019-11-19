@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Listing = ({ title, image, price }) => {
+const Listing = ({ title, image, price, id }) => {
   return (
-    <Link to={`/listing/${title}`}>
+    <Link to={`/listing/${id}`}>
       <button
         style={{
           width: 300,
