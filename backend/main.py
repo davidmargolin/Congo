@@ -8,6 +8,7 @@ import time
 import json
 from pymongo import MongoClient
 import os
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -109,7 +110,8 @@ def dumpThenLoad(item):
 
 # returns all listings by name
 def queryListingsByName(name):
-    productResults = products.find({"name":name})
+    regx = re.compile(name, re.I)
+    productResults = products.find({"name": regx}).limit(20)
     return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by email
