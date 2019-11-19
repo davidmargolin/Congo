@@ -11,6 +11,7 @@ const AddProduct = () => {
     <div>
       <form
         onSubmit={event => {
+          //console.log("SUBMIT FORM WORKS");
           event.preventDefault();
 
           const productPrice = window.web3.utils.toWei(
@@ -77,8 +78,8 @@ const AddProduct = () => {
           placeholder="Your Email"
           required
         />
+        <button type="submit">Add Product</button>
       </form>
-      <button type="submit">Add Product</button>
     </div>
   );
 };

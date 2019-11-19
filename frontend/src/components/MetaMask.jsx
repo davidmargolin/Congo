@@ -6,7 +6,7 @@ import AddProduct from "./AddProduct.jsx";
 const MetaMask = () => {
   const [account, setAccount] = useState("");
 
-  const [productCount, setProductCount] = useState(0);
+  const [productCount, setProductCount] = useState();
   //const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [marketState, setMarketState] = useState();
@@ -51,8 +51,9 @@ const MetaMask = () => {
         networkData.address
       );
 
+      //doesn't set marketState = market immediately
       setMarketState(market);
-      const count = await marketState.methods.productCount().call();
+      const count = await market.methods.productCount.call();
       setProductCount(count);
       console.log(count.toString());
 
