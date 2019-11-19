@@ -27,6 +27,7 @@ contract Congo {
 		uint quantity;
 		uint256 price;
 		string details;
+		string imageLink;
 		string name;
 		address payable owner;
 		string sellerContactDetails;
@@ -37,6 +38,7 @@ contract Congo {
 		uint quantity,
 		uint256 price,
 		string details,
+		string imageLink,
 		string name,
 		address payable owner,
 		string sellerContactDetails
@@ -47,6 +49,7 @@ contract Congo {
 		uint quantity,
 		uint256 price,
 		string details,
+		string imageLink,
 		string name,
 		address payable owner,
 		string sellerContactDetails
@@ -79,6 +82,7 @@ contract Congo {
 		uint256 _price,
 		string memory _details,
 		string memory _name,
+		string memory _imageLink,
 		string memory _sellerContactDetails
 	)
 	public {
@@ -88,6 +92,7 @@ contract Congo {
 		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
+		require(bytes(_imageLink).length > 0, "Image Link is empty");
 		productCount++;
 		//using product count as an id for now.
 		products[productCount] = Product(
@@ -96,6 +101,7 @@ contract Congo {
 			_price,
 			_details,
 			_name,
+			_imageLink,
 			msg.sender,
 			_sellerContactDetails
 		);
@@ -106,6 +112,7 @@ contract Congo {
 			_price,
 			_details,
 			_name,
+			_imageLink,
 			msg.sender,
 			_sellerContactDetails
 		);
@@ -119,6 +126,7 @@ contract Congo {
 		uint256 _price,
 		string memory _details,
 		string memory _name,
+		string memory _imageLink,
 		string memory _sellerContactDetails
 	)
 	public payable{
@@ -129,6 +137,7 @@ contract Congo {
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(_id <= productCount && _id > 0, "product id is invalid.");
 		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
+		require(bytes(_imageLink).length > 0, "Image Link is empty");
 		//fetch the product.
 		Product memory _currentStateOfListing = products[_id];
 
@@ -141,6 +150,7 @@ contract Congo {
 		_currentStateOfListing.price = _price;
 		_currentStateOfListing.quantity = _quantity;
 		_currentStateOfListing.details = _details;
+		_currentStateOfListing.imageLink = _imageLink;
 		_currentStateOfListing.sellerContactDetails = _sellerContactDetails;
 
 		//update mapping on network
@@ -152,6 +162,7 @@ contract Congo {
 			_quantity,
 			_price,
 			_details,
+			_imageLink,
 			_name,
 			msg.sender,
 			_sellerContactDetails
