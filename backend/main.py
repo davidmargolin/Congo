@@ -1,4 +1,5 @@
 from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
@@ -20,6 +21,7 @@ products = client.Congo.products
 orders = client.Congo.orders
 
 app=Flask(__name__)
+CORS(app)
 
 if (isProd):
     CONTRACT_ADDRESS='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
