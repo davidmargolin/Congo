@@ -4,9 +4,9 @@ import { abi } from "../../assets/contract.json";
 import Web3 from "web3";
 
 const getListing = id =>
-  fetch(`https://congo-mart.herokuapp.com/listing/${encodeURIComponent(id)}`).then(res =>
-    res.json()
-  );
+  fetch(
+    `https://congo-mart.herokuapp.com/listing/${encodeURIComponent(id)}`
+  ).then(res => res.json());
 
 const CONTRACT_ADDRESS = "0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607";
 
@@ -52,18 +52,27 @@ const ListingPage = () => {
           <p>{listingData.details}</p>
           <button
             onClick={() => {
-              if (typeof web3 !== "undefined") {
-                const web3 = new Web3(window.web3.currentProvider);
-                const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-                contract.methods
-                  .createOrder(listingID, 1, CONTRACT_ADDRESS, "test@test.com")
-                  .send({
-                    from: window.web3.currentProvider.selectedAddress,
-                    to: "",
-                    value: listingData.price,
-                    gasPrice: "20000000000"
-                  })
-                  .then(response => console.log(response));
+              if (window.ethereum && window.web3) {
+                window.ethereum.enable().then(accounts => {
+                  const web3 = new Web3(window.web3.currentProvider);
+                  const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+                  contract.methods
+                    .createOrder(
+                      listingID,
+                      1,
+                      CONTRACT_ADDRESS,
+                      "test@test.com"
+                    )
+                    .send({
+                      from: window.web3.currentProvider.selectedAddress,
+                      to: "",
+                      value: listingData.price,
+                      gasPrice: "20000000000"
+                    })
+                    .then(response => console.log(response));
+                }).catch(error => {
+                  console.log(error)
+                })
               }
             }}
           >
