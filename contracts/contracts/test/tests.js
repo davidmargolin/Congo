@@ -22,10 +22,12 @@ contract("Congo", accounts => {
   });
 
   describe("products", async () => {
+    let createItemOne, createItemTwo, createItemThree, productCount;
+
     before(async () => {
       createItemOne = await congo.createListing(
         1,
-        web3.utils.toWei("18", "ether"),
+        web3.utils.toWei("5", "ether"),
         "item 1 details",
         "item1",
         "sellerOne@email.com",
@@ -47,8 +49,9 @@ contract("Congo", accounts => {
         "sellerOne@email.com",
         { from: seller }
       );
-
+      console.log("productCount:", productCount);
       productCount = await congo.productCount();
+      console.log("productCount:", productCount.toString());
     });
 
     it("creates products", async () => {
@@ -57,6 +60,8 @@ contract("Congo", accounts => {
   });
 
   describe("updated products", async () => {
+    let updateItemTwoAsSellerTwo;
+
     before(async () => {
       /*This call will fail the test
       updateItemTwoAsSellerOne = await congo.updateListing(
@@ -89,6 +94,8 @@ contract("Congo", accounts => {
   });
 
   describe("orders", async () => {
+    let createOrderOneItemTwoAsBuyerOne;
+
     before(async () => {
       /* This call will fail the test
       createOrderOneItemTwoAsSellerTwo = await congo.createOrder(
@@ -111,39 +118,34 @@ contract("Congo", accounts => {
 
     it("creates orders", async () => {
       //console.log(createOrderOneItemTwoAsBuyerOne.logs[0].args);
-
       //const event1 = createOrderOneItemTwoAsSellerTwo.logs[0].args;
+
       const event2 = createOrderOneItemTwoAsBuyerOne.logs[0].args;
       assert.equal(event2.sellerContactDetails, "sellerTwo@email.com");
     });
   });
 
   describe("update orders", async () => {
+    let updateOrderOneAsSellerTwo;
+
     before(async () => {
+      /* This will fail the test
       updateOrderOneAsSellerOne = await congo.updateOrder(1, 3, {
         from: seller
       });
+      */
 
-      /* This will faill the test
       updateOrderOneAsSellerTwo = await congo.updateOrder(1, 3, {
         from: seller_two
       });
-      */
     });
 
     it("updates order listings", async () => {
-      const event = updateOrderOneAsSellerOne.logs[0].args;
+      const event = updateOrderOneAsSellerTwo.logs[0].args;
       assert.equal(event.orderStatus, 3);
     });
   });
 });
-
-/*
-
-
-
-
-*/
 
 /*
   describe("", async() =>{

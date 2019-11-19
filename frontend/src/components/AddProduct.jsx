@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-const AddProduct = () => {
+const AddProduct = props => {
   const [name, setName] = useState();
   const [price, setPrice] = useState();
   const [quantity, setQuantity] = useState();
@@ -15,16 +15,17 @@ const AddProduct = () => {
           event.preventDefault();
 
           const productPrice = window.web3.utils.toWei(
-            price.toString(),
+            price.value.toString(),
             "Ether"
           );
 
-          this.prop.createProduct(
-            name,
+          //ID will be auto generated in smart contract
+          props.createListing(
+            name.value,
             productPrice,
-            quantity,
-            description,
-            email
+            quantity.value,
+            description.value,
+            email.value
           );
         }}
       >

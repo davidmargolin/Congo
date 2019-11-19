@@ -6,11 +6,12 @@ import AddProduct from "./AddProduct.jsx";
 const MetaMask = () => {
   const [account, setAccount] = useState("");
 
-  const [productCount, setProductCount] = useState();
+  const [productCount, setProductCount] = useState(0);
   //const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [marketState, setMarketState] = useState();
+  let [marketState, setMarketState] = useState();
 
+  //check if ethereum browser is being used
   async function getWeb3() {
     if (await loadWeb3()) {
       await loadBlockChainData();
@@ -38,45 +39,49 @@ const MetaMask = () => {
 
   async function loadBlockChainData() {
     const web3 = window.web3;
-    //loads account information
+    //loads account information of first wallet, will make variable later
     const accounts = await web3.eth.getAccounts();
-    //console.log(accounts);
     setAccount(accounts[0]);
 
+    //checks if smart contract is deployed on the network
     const networkID = await web3.eth.net.getId();
     const networkData = CongoMarket.networks[networkID];
-    if (networkData) {
-      const market = new web3.eth.Contract(
-        CongoMarket.abi,
-        networkData.address
-      );
 
-      //doesn't set marketState = market immediately
-      setMarketState(market);
-      const count = await market.methods.productCount.call();
-      setProductCount(count);
-      console.log(count.toString());
-
-      setLoading(false);
-    } else {
+    if (!networkData) {
       window.alert(
         "The Congo smart contract is not deployed to the current network"
       );
+      return;
     }
+
+    const market = new web3.eth.Contract(CongoMarket.abi, networkData.address);
+
+    /*
+    const count = await market.methods.productCount.call();
+    console.log(count);
+    setProductCount(100); //TEMP
+    console.log(productCount);
+    console.log("Loading: ", loading);
+    */
+
+    //doesn't set marketState = market immediately
+    setMarketState(market);
+
+    //console.log(count);
+
+    setLoading(false);
   }
 
-  //NEED TO FIGURE OUT ID GENERATOR
-  function createProduct(name, price, quantity, description, email) {
+  //Need to figure out better ID generator in smart contract?
+  const createListing = (name, price, quantity, description, email) => {
     setLoading(true);
-    //TEMP ID GENERATOR
-    const id = productCount + 1;
     marketState.methods
-      .createProduct(id, price, description, email)
-      .send({ from: this.account })
+      .createListing(quantity, price, description, name, email)
+      .send({ from: account })
       .once("recipt", recipt => {
         setLoading(false);
       });
-  }
+  };
 
   return (
     <div>
@@ -85,7 +90,10 @@ const MetaMask = () => {
       ) : (
         <div>
           Wallet Address: {account}
-          <AddProduct createProduct={createProduct} />
+          <AddProduct createListing={createListing} />
+          {
+            //console.log(marketState)
+          }
         </div>
       )}
     </div>
