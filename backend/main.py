@@ -110,6 +110,12 @@ def dumpThenLoad(item):
     dump = dumps(item)
     return json.loads(dump)
 
+# returns first listing with a matching id
+def queryListingById(id):
+    listing = products.find_one({"id": id})
+    return dumpThenLoad(listing)
+    
+
 # returns all listings by name
 def queryListingsByName(name):
     regx = re.compile(name, re.I)
@@ -139,6 +145,16 @@ def startWorkers():
 @app.route('/')
 def hello_world():
     return 'Welcome to the backend!'
+
+# get listing by id
+@app.route('/listing/<listingId>')
+def getListing(listingId):
+    if listingId is not None:
+        return jsonify(
+            queryListingById(listingId)
+        )
+    else:
+        return abort(400)
 
 # search listings by name
 @app.route('/search')
