@@ -64,7 +64,7 @@ const ListingPage = () => {
                       "test@test.com"
                     )
                     .send({
-                      from: window.web3.currentProvider.selectedAddress,
+                      from: accounts[0],
                       to: "",
                       value: listingData.price,
                       gasPrice: "20000000000"
