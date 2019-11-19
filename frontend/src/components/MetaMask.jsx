@@ -7,7 +7,7 @@ const MetaMask = () => {
   const [account, setAccount] = useState("");
 
   const [productCount, setProductCount] = useState(0);
-  //const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   let [marketState, setMarketState] = useState();
 
@@ -56,19 +56,16 @@ const MetaMask = () => {
 
     const market = new web3.eth.Contract(CongoMarket.abi, networkData.address);
 
-    /*
-    const count = await market.methods.productCount.call();
-    console.log(count);
-    setProductCount(100); //TEMP
-    console.log(productCount);
-    console.log("Loading: ", loading);
-    */
+    const count = await market.methods.productCount().call();
+    setProductCount(count.toString());
+
+    for (let i = 0; i <= count; i++) {
+      const newProduct = await market.methods.products(i).call();
+      setProducts([...products, newProduct]);
+    }
 
     //doesn't set marketState = market immediately
     setMarketState(market);
-
-    //console.log(count);
-
     setLoading(false);
   }
 
@@ -90,10 +87,9 @@ const MetaMask = () => {
       ) : (
         <div>
           Wallet Address: {account}
-          <AddProduct createListing={createListing} />
-          {
-            //console.log(marketState)
-          }
+          <AddProduct createListing={createListing} products={products} />
+          Number of products on Congo: {productCount}
+          {console.log(products)}
         </div>
       )}
     </div>
