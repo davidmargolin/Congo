@@ -81,6 +81,59 @@ const AddProduct = props => {
         />
         <button type="submit">Add Product</button>
       </form>
+      <h2>List of products</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Product #</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price </th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Description</th>
+            <th scope="col">Seller Email</th>
+          </tr>
+        </thead>
+        <tbody id="productList">
+          {props.products.map((product, key) => {
+            return (
+              <tr key={key}>
+                <th>{product.id.toString()}</th>
+                <td>{product.name}</td>
+                <td>
+                  {window.web3.utils.fromWei(product.price.toString(), "Ether")}
+                </td>
+                <td>{product.quantity}</td>
+                <td>{product.details}</td>
+                <td>{product.sellerContactDetails}</td>
+                <td>
+                  {//possibly create condition to prevent showing the listings user has made
+                  product.quantity > 0 ? (
+                    <button
+                      onClick={e => {
+                        //TEMP PURCHASE QUANTITY OF ONE PER BUY, NEEDS TO BE HOOKED UP WITH CART
+                        let tmpQuantity = 1;
+                        let tmpMsg = "Ship fast plz";
+                        let tmpMail = "Purchaser69@mail.com";
+                        props.createOrder(
+                          product.id,
+                          product.price,
+                          tmpQuantity,
+                          tmpMsg,
+                          tmpMail
+                        );
+                      }}
+                    >
+                      Buy
+                    </button>
+                  ) : (
+                    <div>Purchase is unavailable</div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
