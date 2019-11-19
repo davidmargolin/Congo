@@ -169,9 +169,9 @@ def userListings():
     else:
         return abort(400)
 
+serverStatusResult = client.Congo.command("serverStatus")
+startWorkers()
+print("Connected to Mongo Atlas:",serverStatusResult['host'])
+
 if __name__ == '__main__':
-    serverStatusResult = client.Congo.command("serverStatus")
-    startWorkers()
-    print("Connected to Mongo Atlas:",serverStatusResult['host'])
-    
     app.run()
