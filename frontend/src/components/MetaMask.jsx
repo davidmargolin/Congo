@@ -59,13 +59,20 @@ const MetaMask = () => {
     const count = await market.methods.productCount().call();
     setProductCount(count.toString());
 
-    for (let i = 0; i <= count; i++) {
+    let tmpArr = [];
+    for (let i = 1; i <= count; i++) {
+      //console.log(i);
       const newProduct = await market.methods.products(i).call();
-      setProducts([...products, newProduct]);
+      //console.log(newProduct);
+      tmpArr = [...tmpArr, newProduct];
     }
 
+    console.log(tmpArr);
+
+    setProducts(tmpArr);
     //doesn't set marketState = market immediately
     setMarketState(market);
+    //console.log(marketState);
     setLoading(false);
   }
 
@@ -75,7 +82,18 @@ const MetaMask = () => {
     marketState.methods
       .createListing(quantity, price, description, name, email)
       .send({ from: account })
-      .once("recipt", recipt => {
+      .once("receipt", receipt => {
+        setLoading(false);
+      });
+  };
+
+  //NEEDS TO BE UPDATED WHEN HOOKED WITH CART
+  const createOrder = (id, price, quantity, notes, email) => {
+    setLoading(true);
+    marketState.methods
+      .createOrder(id, quantity, notes, email)
+      .send({ from: account, value: price })
+      .once("receipt", receipt => {
         setLoading(false);
       });
   };
@@ -87,7 +105,13 @@ const MetaMask = () => {
       ) : (
         <div>
           Wallet Address: {account}
-          <AddProduct createListing={createListing} products={products} />
+          <AddProduct
+            createListing={createListing}
+            createOrder={createOrder}
+            products={products}
+          />
+          Reminder: Don't try to purchase a listing if you are the seller
+          <div></div>
           Number of products on Congo: {productCount}
           {console.log(products)}
         </div>
