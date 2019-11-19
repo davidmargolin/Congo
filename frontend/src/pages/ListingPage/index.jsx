@@ -4,7 +4,7 @@ import { abi } from "../../assets/contract.json";
 import Web3 from "web3";
 
 const getListing = id =>
-  fetch(`http://localhost:8000/listing/${encodeURIComponent(id)}`).then(res =>
+  fetch(`https://congo-mart.herokuapp.com/listing/${encodeURIComponent(id)}`).then(res =>
     res.json()
   );
 
