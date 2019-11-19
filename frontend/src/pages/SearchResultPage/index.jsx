@@ -11,16 +11,16 @@ import { useParams } from "react-router-dom";
 // });
 
 const getSearchResults = query =>
-  fetch(`https://congo-mart.herokuapp.com/search?query=${encodeURIComponent(query)}`).then(res =>
-    res.json()
-  );
+  fetch(
+    `https://congo-mart.herokuapp.com/search?query=${encodeURIComponent(query)}`
+  ).then(res => res.json());
 
 const SearchResultPage = () => {
   const { query } = useParams();
-  const [listings, setListings] = useState([])
+  const [listings, setListings] = useState([]);
   useEffect(() => {
     getSearchResults(query || "").then(({ results }) => {
-      setListings(results)
+      setListings(results);
     });
   }, [query]);
   return (
@@ -45,8 +45,8 @@ const SearchResultPage = () => {
           justifyContent: "center"
         }}
       >
-        {listings.map(({ name, image, price }) => (
-          <Listing title={name} image={image} price={price} />
+        {listings.map(({ name, image, price, id }) => (
+          <Listing title={name} image={image} price={price} id={id} />
         ))}
       </div>
     </span>
