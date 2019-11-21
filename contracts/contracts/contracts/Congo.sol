@@ -118,7 +118,27 @@ contract Congo {
 		);
 
 	}
-
+	//update listing quantity when order is created and paid for.
+	function updateQuantity(
+		uint _id,
+		uint _newQuantity
+	)
+	internal{
+		//get the product.
+		Product memory listing = products[_id];
+		listing.quantity = _newQuantity;
+		products[_id] = listing;
+		emit listingUpdated(
+			_id,
+			listing.quantity,
+			listing.price,
+			listing.details,
+			listing.imageLink,
+			listing.name,
+			listing.owner,
+			listing.sellerContactDetails
+		);
+	}
 	//exposed function updates a listing.
 	function updateListing(
 		uint _id,
@@ -190,14 +210,14 @@ contract Congo {
 		uint quantityRemaining = _listing.quantity;
 		require(_quantity <= quantityRemaining,"Purchase Quantity exceeds Available Quantity");
 		uint256 orderTotal = _listing.price * _quantity;
+		quantityRemaining = quantityRemaining - _quantity;
 		//make sure buyer is not seller.
 		require(buyer != seller, "You cannot purchase your own products.");
 		//make sure payment is sufficient.
 		require(msg.value >= orderTotal, "Not enough to cover the total cost.");
 
 		//update the listing quantity.
-		_listing.quantity = _listing.quantity - _quantity;
-		products[_id] = _listing;
+		updateQuantity(_id,quantityRemaining);
 		//create a new order!
 		orderCount++;
 		orders[orderCount] = Order(
@@ -213,7 +233,6 @@ contract Congo {
 			_buyerContactDetails,
 			State.Listed
 		);
-
 		//transfer value.
 		address(seller).transfer(msg.value);
 		//broadcast to listeners that an existing product has been updated.
