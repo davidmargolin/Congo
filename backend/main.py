@@ -3,22 +3,36 @@ from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
 from requests.models import Response
+from bson.json_util import dumps
 import time
 import json
 from pymongo import MongoClient
 import os
 from flask import request
 from flask import abort
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 load_dotenv()
 
 username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
 isProd = os.getenv('ENVIRONMENT') == "production"
+sendGridKey = os.getenv('SENDGRIDAPIKEY')
+congoEmail = "no-reply@congo.io"
+
+allStatuses = {
+    "0": "Listed",
+    "1": "Processing",
+    "2": "Shipped",
+    "3": "Complete",
+    "4": "Exception"
+}
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
+isProd = False
 
 app=Flask(__name__)
 
@@ -29,7 +43,7 @@ if (isProd):
         info_json = json.load(f)
         congo_abi = info_json["abi"]
 else:
-    CONTRACT_ADDRESS='0xe5Bb754A97253249257A1b29E582e85d09137FCD'
+    CONTRACT_ADDRESS='0x30D03d72Eba7B60c7Ea6783Cfc719202F3427A37'
     w3=Web3(HTTPProvider('http://localhost:7545'))
     with open("../contracts/contracts/build/contracts/Congo.json") as f:
         info_json = json.load(f)
@@ -37,6 +51,25 @@ else:
     
 contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
 accounts=w3.eth.accounts
+
+#Email Confirmation Service
+def sendEmail(toEmail,sub,content):
+    message = Mail(
+        from_email=congoEmail,
+        to_emails=toEmail,
+        subject=sub,
+        html_content=content
+    )
+    print("[SendGrid Attempt]: From: %s To: %s Subject: %s" %(congoEmail,toEmail,sub))
+    try:
+        sg = SendGridAPIClient(sendGridKey)
+        response = sg.send(message)
+        if (response.status_code == 202):
+            print("[SendGrid Success]: From: %s To: %s Subject: %s" %(congoEmail,toEmail,sub))
+        else:
+            print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
+    except Exception as e:
+        print(e)
 
 def convertEvent(event):
     jsonStr = ""
@@ -72,11 +105,21 @@ def updateListing(event):
             "sellerContactDetails": updatedListing['sellerContactDetails']
         }
     })
-
 def putNewOrder(event):    
     newOrder = convertEvent(event)
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
+    content = "Order #: %s | Status: %s | %s (%s) purchased %sx of %s, you got paid %s wei" % (
+        newOrder['orderID'],
+        allStatuses[newOrder['orderStatus']],
+        newOrder['buyerContactDetails'],
+        newOrder['buyerAddress'],
+        newOrder['quantity'],
+        newOrder['prodName'],
+        newOrder['total']
+    )
+    sendEmail(newOrder['sellerContactDetails'],"You have a new order!",content)
+    print("seller has been notified of new order")
 
 def updateOrder(event):
     updatedOrder = convertEvent(event)
@@ -86,6 +129,16 @@ def updateOrder(event):
             "orderStatus": updatedOrder['orderStatus']
         }
     })
+
+    content = "Order #: %s | Updated Status: %s " % (
+        updatedOrder['orderID'],
+        allStatuses[updatedOrder['orderStatus']]
+    )
+    res = orders.find_one({"orderID": updatedOrder['orderID']})
+    orderLoaded = dumpThenLoad(res)
+    print(orderLoaded)
+    
+    sendEmail(orderLoaded['buyerContactDetails'],"Your order updated!",content)
 
 
 def eventMap(filters,poll_interval):
@@ -106,6 +159,15 @@ def eventMap(filters,poll_interval):
                 for event in filters[key].get_new_entries():
                     updateOrder(event)
         time.sleep(poll_interval)
+
+def dumpThenLoad(item):
+    dump = dumps(item)
+    return json.loads(dump)
+
+# returns first listing with a matching id
+def queryListingById(id):
+    listing = products.find_one({"id": id})
+    return dumpThenLoad(listing)
 
 # returns all listings by name
 def queryListingsByName(name):
@@ -169,9 +231,9 @@ def userListings():
     else:
         return abort(400)
 
+serverStatusResult = client.Congo.command("serverStatus")
+startWorkers()
+print("Connected to Mongo Atlas:",serverStatusResult['host'])
+
 if __name__ == '__main__':
-    serverStatusResult = client.Congo.command("serverStatus")
-    startWorkers()
-    print("Connected to Mongo Atlas:",serverStatusResult['host'])
-    
     app.run()
