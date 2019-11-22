@@ -19424,15 +19424,111 @@
           "name": "orderCreated",
           "type": "event",
           "signature": "0x222a393215b1913680e04cacf6ab8787ca04ab6a8406b3a507106ed4bbdf9d8d"
+        },
+        "0x3d066cecd9e38b6727c3e1db2a27bc098ecd639a5d3c5c41ddd58231c5386018": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "details",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "imageLink",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sellerContactDetails",
+              "type": "string"
+            }
+          ],
+          "name": "listingCreated",
+          "type": "event",
+          "signature": "0x3d066cecd9e38b6727c3e1db2a27bc098ecd639a5d3c5c41ddd58231c5386018"
+        },
+        "0xd7e495504c4d9018ae9d54840e5302471f344fa8731a9ff87d20a40ca5ccac45": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "details",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "imageLink",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sellerContactDetails",
+              "type": "string"
+            }
+          ],
+          "name": "listingUpdated",
+          "type": "event",
+          "signature": "0xd7e495504c4d9018ae9d54840e5302471f344fa8731a9ff87d20a40ca5ccac45"
         }
       },
       "links": {},
-      "address": "0x1F6748B877333B2bA9f18935E157005FCC4FE8bd",
-      "transactionHash": "0x815ef78f6c95bee6198c02bd81f43e4ed86a927dda9d85c42dd1de1d2370c0a8"
+      "address": "0x30D03d72Eba7B60c7Ea6783Cfc719202F3427A37",
+      "transactionHash": "0x2e53e8a5a91198e26131a384bec9f7a09b4a9a2e76d6970ef7b167a07cc84b3f"
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-11-21T19:12:49.374Z",
+  "updatedAt": "2019-11-21T23:25:33.976Z",
   "devdoc": {
     "methods": {}
   },

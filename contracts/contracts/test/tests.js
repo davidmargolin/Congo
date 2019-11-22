@@ -9,8 +9,8 @@ var buyer_two = accounts[3];
 var seller_two = accounts[4];
 
 createItemOne = await congo.createListing(1,web3.utils.toWei('18','ether'),"item 1 details","https://www.imgur.com/a/imageid1","item1","sellerOne@email.com",{from: seller})
-createItemTwo = await congo.createListing(2,web3.utils.toWei('36',"ether"),"item 2 details","item2","https://www.imgur.com/a/imageid12","sellerTwo@email.com",{from: seller_two})
-createItemThree = await congo.createListing(6,web3.utils.toWei('9',"ether"),"item 3 deets","item3","https://www.imgur.com/a/imageid123","sellerOne@email.com",{from: seller})
+createItemTwo = await congo.createListing(2,web3.utils.toWei('36',"ether"),"item 2 details","item2","https://www.imgur.com/a/imageid12","kentkfeng@gmail.com",{from: seller_two})
+createItemThree = await congo.createListing(6,web3.utils.toWei('9',"ether"),"item 3 deets","item3","https://www.imgur.com/a/imageid123","kentkfeng@gmail.com",{from: seller})
 
 updateItemTwoAsSellerOne = await congo.updateListing(2,4,web3.utils.toWei('64',"ether"),"haha changed item 2","item2","https://www.imgur.com/a/imageid123","sellerOne@email.com",{from: seller})
 updateItemTwoAsSellerTwo = await congo.updateListing(2,2,web3.utils.toWei('20',"ether"),"item 2 details","item2","https://www.imgur.com/a/imageid123","sellerTwo@email.com",{from: seller_two})

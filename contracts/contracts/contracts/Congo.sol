@@ -259,6 +259,7 @@ contract Congo {
 		//validate user's input
 		require(_id <= orderCount && _id > 0, "order id is invalid.");
 		require(uint(State.Exception) >= nextState,"invalid input state. >");
+		//state should only move forwards
 		//get the order.
 		Order memory _order = orders[_id];
 		//check if caller has permission to edit
