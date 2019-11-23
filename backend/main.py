@@ -5,6 +5,7 @@ import requests
 from requests.models import Response
 from bson.json_util import dumps
 import time
+import datetime
 import json
 from pymongo import MongoClient
 import os
@@ -19,7 +20,7 @@ username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
 isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
-congoEmail = "no-reply@congo.io"
+congoEmail = "Congo-Exchange@no-reply.io"
 
 allStatuses = {
     "0": "Listed",
@@ -32,7 +33,6 @@ allStatuses = {
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
-isProd = False
 
 app=Flask(__name__)
 
@@ -43,7 +43,7 @@ if (isProd):
         info_json = json.load(f)
         congo_abi = info_json["abi"]
 else:
-    CONTRACT_ADDRESS='0x30D03d72Eba7B60c7Ea6783Cfc719202F3427A37'
+    CONTRACT_ADDRESS='0x6BDA1B6D18CBda0D093DE85327262960213A35a2'
     w3=Web3(HTTPProvider('http://localhost:7545'))
     with open("../contracts/contracts/build/contracts/Congo.json") as f:
         info_json = json.load(f)
@@ -69,6 +69,7 @@ def sendEmail(toEmail,sub,content):
         else:
             print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
     except Exception as e:
+        print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
         print(e)
 
 def convertEvent(event):
@@ -90,6 +91,8 @@ def print_event(event):
 def putNewProduct(event):
     newProduct = convertEvent(event)
     print("creating new listing with id: ",newProduct['id'])
+    #add ts
+    newProduct['listingTimestamp'] = datetime.datetime.utcnow()
     products.insert_one(newProduct)
 
 def updateListing(event):
@@ -102,11 +105,13 @@ def updateListing(event):
             "price": updatedListing['price'],
             "details": updatedListing['details'],
             "name": updatedListing['name'],
-            "sellerContactDetails": updatedListing['sellerContactDetails']
+            "sellerContactDetails": updatedListing['sellerContactDetails'],
+            "lastUpdatedTimestamp": datetime.datetime.utcnow()
         }
     })
 def putNewOrder(event):    
     newOrder = convertEvent(event)
+    newOrder['listingTimestamp'] = datetime.datetime.utcnow()
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
     content = "Order #: %s | Status: %s | %s (%s) purchased %sx of %s, you got paid %s wei" % (
@@ -126,7 +131,8 @@ def updateOrder(event):
     print("updating order with id: ",updatedOrder['orderID'])
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
-            "orderStatus": updatedOrder['orderStatus']
+            "orderStatus": updatedOrder['orderStatus'],
+            'lastUpdatedTimestamp': datetime.datetime.utcnow()
         }
     })
 
@@ -135,6 +141,9 @@ def updateOrder(event):
         allStatuses[updatedOrder['orderStatus']]
     )
     res = orders.find_one({"orderID": updatedOrder['orderID']})
+    if res is None:
+        print("Order was not found")
+        return
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
     
