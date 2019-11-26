@@ -2,3 +2,4 @@
 .vscode
 env/
 app.yaml
+__pycache__/

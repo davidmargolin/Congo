@@ -1,21 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { abi } from "../../assets/contract.json";
+import Web3 from "web3";
 
-const data = {
-  image: "https://via.placeholder.com/400",
-  title: "Product Name",
-  description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vivamus arcu felis bibendum ut tristique. Varius sit amet mattis vulputate enim nulla aliquet. Ac turpis egestas maecenas pharetra convallis. Diam vulputate ut pharetra sit amet aliquam id. Sollicitudin ac orci phasellus egestas tellus rutrum. Feugiat nisl pretium fusce id. Dui nunc mattis enim ut tellus elementum sagittis vitae et. Fringilla ut morbi tincidunt augue interdum velit euismod. Purus in massa tempor nec feugiat nisl pretium. Adipiscing elit duis tristique sollicitudin nibh sit amet commodo. Et egestas quis ipsum suspendisse. Nisl nunc mi ipsum faucibus vitae aliquet.
+const getListing = id =>
+  fetch(
+    `https://congo-mart.herokuapp.com/listing/${encodeURIComponent(id)}`
+  ).then(res => res.json());
 
-  Sagittis vitae et leo duis ut diam quam. Ultrices sagittis orci a scelerisque purus semper eget duis. Quis vel eros donec ac odio tempor orci dapibus. Bibendum ut tristique et egestas quis ipsum suspendisse. Vel risus commodo viverra maecenas accumsan lacus vel. Malesuada fames ac turpis egestas. Egestas integer eget aliquet nibh praesent tristique. Consequat id porta nibh venenatis cras sed felis. Est pellentesque elit ullamcorper dignissim cras tincidunt. Elementum eu facilisis sed odio morbi quis. Rhoncus dolor purus non enim praesent elementum.
-  
-  Montes nascetur ridiculus mus mauris vitae ultricies leo integer malesuada. Vivamus at augue eget arcu dictum varius duis at consectetur. Eleifend quam adipiscing vitae proin sagittis. Accumsan in nisl nisi scelerisque eu ultrices vitae auctor. Facilisis magna etiam tempor orci eu. Commodo odio aenean sed adipiscing diam donec adipiscing. Vestibulum lectus mauris ultrices eros in cursus turpis massa. Pulvinar sapien et ligula ullamcorper malesuada proin. Sit amet consectetur adipiscing elit duis tristique. Erat nam at lectus urna duis convallis convallis tellus. Sit amet massa vitae tortor condimentum lacinia. In hac habitasse platea dictumst quisque sagittis. Nulla malesuada pellentesque elit eget gravida. Sed cras ornare arcu dui vivamus arcu felis bibendum ut. Viverra mauris in aliquam sem fringilla ut. Sagittis aliquam malesuada bibendum arcu.`,
-  price: "3.45",
-  quantity: 20
+const CONTRACT_ADDRESS = "0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607";
+
+const makePurchase = (id, price, quantity, email) => {
+  if (window.ethereum) {
+    window.ethereum
+      .enable()
+      .then(() => {
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+        web3.eth.getAccounts().then(accounts => {
+          const transaction = contract.methods.createOrder(
+            id,
+            quantity,
+            CONTRACT_ADDRESS,
+            email
+          );
+
+          transaction
+            .send({
+              from: web3.currentProvider.selectedAddress || accounts[0],
+              value: price
+            })
+            .then(response => console.log(response));
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 };
 
 const ListingPage = () => {
   const { listingID } = useParams();
+  const [listingData, setListingData] = useState(null);
+  useEffect(() => {
+    getListing(listingID).then(data => {
+      setListingData(data);
+    });
+  }, [listingID]);
 
+  if (!listingData) return <div></div>;
   return (
     <span
       style={{
@@ -35,12 +68,22 @@ const ListingPage = () => {
           justifyContent: "flex-start"
         }}
       >
-        <img src={data.image} style={{ width: 400, height: 400 }} />
+        <img src={listingData.image} style={{ width: 400, height: 400 }} />
         <br />
         <div style={{ flex: 1, marginLeft: 40 }}>
-          <h3>Product {listingID}</h3>
-          <p>${data.price}</p>
-          <p>{data.description}</p>
+          <h3>{listingData.name}</h3>
+          <p>{listingData.price}</p>
+          <a href={`https://ropsten.etherscan.io/address/${listingData.owner}`}>
+            View Seller Info
+          </a>
+          <p>{listingData.details}</p>
+          <button
+            onClick={() =>
+              makePurchase(listingID, listingData.price, 1, "test@test.com")
+            }
+          >
+            Buy Now
+          </button>
         </div>
       </div>
     </span>

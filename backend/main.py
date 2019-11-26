@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from web3 import Web3,HTTPProvider,IPCProvider,WebsocketProvider
 from threading import Thread
 import requests
@@ -9,10 +10,9 @@ import datetime
 import json
 from pymongo import MongoClient
 import os
-from flask import request
-from flask import abort
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -35,6 +35,7 @@ products = client.Congo.products
 orders = client.Congo.orders
 
 app=Flask(__name__)
+CORS(app)
 
 if (isProd):
     CONTRACT_ADDRESS='0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607'
@@ -177,21 +178,23 @@ def dumpThenLoad(item):
 def queryListingById(id):
     listing = products.find_one({"id": id})
     return dumpThenLoad(listing)
+    
 
 # returns all listings by name
 def queryListingsByName(name):
-    productResults = products.find({"name":name})
-    return list(productResults)
+    regx = re.compile(name, re.I)
+    productResults = products.find({"name": regx}).limit(20)
+    return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by email
 def queryListingsByEmail(email):
     productResults = products.find({"sellerContactDetails":email})
-    return list(productResults)
+    return list(map(dumpThenLoad, list(productResults)))
 
 # returns all orders by email
 def queryOrdersByEmail(email):
     orderResults = orders.find({"buyerContactDetails":email})
-    return list(orderResults)
+    return list(map(dumpThenLoad, list(orderResults)))
 
 def startWorkers():
     filters = {
@@ -207,12 +210,22 @@ def startWorkers():
 def hello_world():
     return 'Welcome to the backend!'
 
+# get listing by id
+@app.route('/listing/<listingId>')
+def getListing(listingId):
+    if listingId is not None:
+        return jsonify(
+            queryListingById(listingId)
+        )
+    else:
+        return abort(400)
+
 # search listings by name
 @app.route('/search')
 def search():
     query = request.args.get('query')
     if query is not None:
-        return json.dumps(
+        return jsonify(
             {"results": queryListingsByName(query)}
         )
     else:
@@ -223,7 +236,7 @@ def search():
 def userOrders():
     email = request.args.get('email') 
     if email is not None:
-        return json.dumps(
+        return jsonify(
             {"orders": queryOrdersByEmail(email)}
         )
     else:
@@ -234,7 +247,7 @@ def userOrders():
 def userListings():
     email = request.args.get('email') 
     if email is not None:
-        return json.dumps(
+        return jsonify(
             {"listings": queryListingsByEmail(email)}
         )
     else:
