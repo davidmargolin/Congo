@@ -8,7 +8,7 @@ var seller = accounts[2];
 var buyer_two = accounts[3];
 var seller_two = accounts[4];
 
-createItemOne = await congo.createListing(1,web3.utils.toWei('18','ether'),"item 1 details","item1","sellerOne@email.com",{from: seller})
+createItemOne = await congo.createListing(1,web3.utils.toWei('18','ether'),"item 1 details","item1","www.google.com/images","sellerOne@email.com",{from: seller})
 createItemTwo = await congo.createListing(2,web3.utils.toWei('36',"ether"),"item 2 details","item2","sellerTwo@email.com",{from: seller_two})
 createItemThree = await congo.createListing(6,web3.utils.toWei('9',"ether"),"item 3 deets","item3","sellerOne@email.com",{from: seller})
 
