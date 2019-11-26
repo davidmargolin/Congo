@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 import Account from "./pages/AccountPage";
 import Cart from "./pages/CartPage";
+import CreateListing from "./pages/CreateListingPage";
 import firebase from "firebase/app";
 import "firebase/auth";
 
@@ -56,6 +57,9 @@ const App = () => {
           </Route>
           <Route exact path="/cart">
             <Cart />
+          </Route>
+          <Route exact path="/createListing">
+            <CreateListing />
           </Route>
           <Route path="/">
             <SearchResults />

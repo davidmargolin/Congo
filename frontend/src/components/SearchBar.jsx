@@ -51,6 +51,17 @@ const SearchBar = ({ history }) => {
         <Link to="/account">
           <img src={account} style={{ height: 50, margin: 12 }} />
         </Link>
+
+        <Link to="/createListing">
+          <span style={{
+            height: 20,
+            flex: 1,
+            fontSize: 18,
+            padding: 12
+          }}>
+            Create listing
+          </span>
+        </Link>
       </div>
     </div>
   );
