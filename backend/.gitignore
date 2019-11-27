@@ -3,3 +3,4 @@
 env/
 app.yaml
 __pycache__/
+./node_modules/
