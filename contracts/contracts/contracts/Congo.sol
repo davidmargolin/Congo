@@ -27,6 +27,7 @@ contract Congo {
 		uint quantity;
 		uint256 price;
 		string details;
+		string imageLink;
 		string name;
 		address payable owner;
 		string sellerContactDetails;
@@ -37,6 +38,7 @@ contract Congo {
 		uint quantity,
 		uint256 price,
 		string details,
+		string imageLink,
 		string name,
 		address payable owner,
 		string sellerContactDetails
@@ -47,6 +49,7 @@ contract Congo {
 		uint quantity,
 		uint256 price,
 		string details,
+		string imageLink,
 		string name,
 		address payable owner,
 		string sellerContactDetails
@@ -79,6 +82,7 @@ contract Congo {
 		uint256 _price,
 		string memory _details,
 		string memory _name,
+		string memory _imageLink,
 		string memory _sellerContactDetails
 	)
 	public {
@@ -88,6 +92,7 @@ contract Congo {
 		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
+		require(bytes(_imageLink).length > 0, "Image Link is empty");
 		productCount++;
 		//using product count as an id for now.
 		products[productCount] = Product(
@@ -96,6 +101,7 @@ contract Congo {
 			_price,
 			_details,
 			_name,
+			_imageLink,
 			msg.sender,
 			_sellerContactDetails
 		);
@@ -106,12 +112,33 @@ contract Congo {
 			_price,
 			_details,
 			_name,
+			_imageLink,
 			msg.sender,
 			_sellerContactDetails
 		);
 
 	}
-
+	//update listing quantity when order is created and paid for.
+	function updateQuantity(
+		uint _id,
+		uint _newQuantity
+	)
+	internal{
+		//get the product.
+		Product memory listing = products[_id];
+		listing.quantity = _newQuantity;
+		products[_id] = listing;
+		emit listingUpdated(
+			_id,
+			listing.quantity,
+			listing.price,
+			listing.details,
+			listing.imageLink,
+			listing.name,
+			listing.owner,
+			listing.sellerContactDetails
+		);
+	}
 	//exposed function updates a listing.
 	function updateListing(
 		uint _id,
@@ -119,6 +146,7 @@ contract Congo {
 		uint256 _price,
 		string memory _details,
 		string memory _name,
+		string memory _imageLink,
 		string memory _sellerContactDetails
 	)
 	public payable{
@@ -129,6 +157,7 @@ contract Congo {
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(_id <= productCount && _id > 0, "product id is invalid.");
 		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
+		require(bytes(_imageLink).length > 0, "Image Link is empty");
 		//fetch the product.
 		Product memory _currentStateOfListing = products[_id];
 
@@ -141,6 +170,7 @@ contract Congo {
 		_currentStateOfListing.price = _price;
 		_currentStateOfListing.quantity = _quantity;
 		_currentStateOfListing.details = _details;
+		_currentStateOfListing.imageLink = _imageLink;
 		_currentStateOfListing.sellerContactDetails = _sellerContactDetails;
 
 		//update mapping on network
@@ -152,6 +182,7 @@ contract Congo {
 			_quantity,
 			_price,
 			_details,
+			_imageLink,
 			_name,
 			msg.sender,
 			_sellerContactDetails
@@ -179,14 +210,14 @@ contract Congo {
 		uint quantityRemaining = _listing.quantity;
 		require(_quantity <= quantityRemaining,"Purchase Quantity exceeds Available Quantity");
 		uint256 orderTotal = _listing.price * _quantity;
+		quantityRemaining = quantityRemaining - _quantity;
 		//make sure buyer is not seller.
 		require(buyer != seller, "You cannot purchase your own products.");
 		//make sure payment is sufficient.
 		require(msg.value >= orderTotal, "Not enough to cover the total cost.");
 
 		//update the listing quantity.
-		_listing.quantity = _listing.quantity - _quantity;
-		products[_id] = _listing;
+		updateQuantity(_id,quantityRemaining);
 		//create a new order!
 		orderCount++;
 		orders[orderCount] = Order(
@@ -202,7 +233,6 @@ contract Congo {
 			_buyerContactDetails,
 			State.Listed
 		);
-
 		//transfer value.
 		address(seller).transfer(msg.value);
 		//broadcast to listeners that an existing product has been updated.
@@ -229,6 +259,7 @@ contract Congo {
 		//validate user's input
 		require(_id <= orderCount && _id > 0, "order id is invalid.");
 		require(uint(State.Exception) >= nextState,"invalid input state. >");
+		//state should only move forwards
 		//get the order.
 		Order memory _order = orders[_id];
 		//check if caller has permission to edit
