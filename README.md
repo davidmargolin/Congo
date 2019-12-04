@@ -60,6 +60,7 @@ Please note that there is no mechanism in this contract for performing refunds a
 
 **Updating a Listing**
 <br>This function allows sellers to modify a listing once it has been created. Only listing publishers a.k.a the seller of any particular listing can update the details. Once a listing is successfully updated, a `listingUpdated` event is emitted with all the new listing details.
+
 **Requirements**:
 <br>**callerAddress == sellerAddress**
 
