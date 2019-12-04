@@ -27,7 +27,7 @@ Please note that there is no mechanism in this contract for performing refunds a
 
 
 **Requirements**:
-<br>**buyerAddress != sellerAddress**
+<br>**callerAddress != sellerAddress**
 
 `function createOrder()`:
 1. `uint _id` - the listing id to be purchased
@@ -39,7 +39,7 @@ Please note that there is no mechanism in this contract for performing refunds a
 <br>This function allows sellers to update their order status which is represented in `State`. Once completed an `orderUpdated` event is emitted indicating the new order status/state.
 
 **Requirements**:
-<br>**buyerAddress == sellerAddress**
+<br>**callerAddress == sellerAddress**
 
 `function updateOrder()`:
 1. `uint _id` - the listing id to be purchased
@@ -60,6 +60,8 @@ Please note that there is no mechanism in this contract for performing refunds a
 
 **Updating a Listing**
 <br>This function allows sellers to modify a listing once it has been created. Only listing publishers a.k.a the seller of any particular listing can update the details. Once a listing is successfully updated, a `listingUpdated` event is emitted with all the new listing details.
+**Requirements**:
+<br>**callerAddress == sellerAddress**
 
 `function updateListing()`:
 1. `uint _id` - the valid listing ID to be updated
