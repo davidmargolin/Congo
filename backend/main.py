@@ -46,7 +46,7 @@ orders = client.Congo.orders
 
 app=Flask(__name__)
 CORS(app)
-isProd = True
+
 if (isProd):
     CONTRACT_ADDRESS='0xb0D2655EEF43b018EEf0bd5691cfFfB96d4D0702'
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
@@ -178,6 +178,9 @@ def generateNewOrderEmail(some_order):
     with open("./email-template.html") as inf:
         template = inf.read()
         email = bs4.BeautifulSoup(template,features="html.parser")
+    if email is None:
+        print("[Email Service]: Problems opening email template file.")
+        return
 
     email_summary = email.find("span",id="email-summary")
     congo_type = email.find("td",id="congo-type")
@@ -193,9 +196,6 @@ def generateNewOrderEmail(some_order):
     order_status = email.find("td",id="order-status")
 
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],some_order['orderStatus']))
-    email_summary.append(email.new_tag('br'))
-    email_summary.append(email.new_tag('br'))
-    email_summary.append(email.new_tag('br'))
     congo_type.append(some_order['congoType'])
     item_photo['src'] = some_order['imageLink']
     price.append('Ξ')
@@ -216,25 +216,6 @@ def generateNewOrderEmail(some_order):
     order_status.append(some_order['orderStatus'])
 
     return str(email)
-
-# order_foo = {
-#     'total': 100,
-#     'quantity': 2,
-#     'prodName': "iPhone X",
-#     'orderID': 15,
-#     'listingTimestamp': str(datetime.datetime.utcnow()),
-#     'buyerContactDetails':'kentkfeng@gmail.com',
-#     'buyerAddress':"0xf00add",
-#     'sellerContactDetails': "kentkfeng@gmail.com",
-#     'sellerAddress': "0xf3sdj93j9sdjggndml",
-#     'imageLink': "https://i.imgur.com/H7vkovB.png",
-#     'orderStatus': "Exception",
-#     'congoType': ("%s Your order has updated!" % (statusToEmoji['Exception']))
-# }
-# # need to add seller contact/address, and image link attributes from mongo.
-# content = generateNewOrderEmail(order_foo)
-# sendEmail("kentkfeng@gmail.com",order_foo['congoType'],content)
-
 
 def eventMap(filters,poll_interval):
     print("started worker thread!")
