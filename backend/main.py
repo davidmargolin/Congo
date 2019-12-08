@@ -31,6 +31,15 @@ allStatuses = {
     "4": "Exception"
 }
 
+statusToEmoji = {
+    "Listed": "✏️",
+    "Processing": "💸",
+    "Shipped" : "🚚💨",
+    "Complete": "📦",
+    "Exception": "⛔"
+}
+
+
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
@@ -128,18 +137,17 @@ def putNewOrder(event):
     newOrder['listingTimestamp'] = datetime.datetime.utcnow()
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
-    content = "Order #: %s | Status: %s | %s (%s) purchased %sx of %s, you got paid %s wei" % (
-        newOrder['orderID'],
-        allStatuses[newOrder['orderStatus']],
-        newOrder['buyerContactDetails'],
-        newOrder['buyerAddress'],
-        newOrder['quantity'],
-        newOrder['prodName'],
-        newOrder['total']
-    )
+
+    #fetch image link to attach to obj in order to generate email body
+    prodListing = products.find_one({"id": newOrder['orderID']})
+    if(prodListing is None):
+        newOrder['imageLink'] = "" # default no pic
+    else:
+        newOrder['imageLink'] = prodListing['imageLink'] 
+
+    newOrder['congoType'] = ("%s You have a new order!"% statusToEmoji[newOrder['orderStatus']])
     content = generateNewOrderEmail(newOrder)
-    sendEmail(newOrder['sellerContactDetails'],"You have a new order!",content)
-    print("seller has been notified of new order")
+    sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
 
 def updateOrder(event):
     updatedOrder = convertEvent(event)
@@ -151,28 +159,28 @@ def updateOrder(event):
         }
     })
 
-    content = "Order #: %s | Updated Status: %s " % (
-        updatedOrder['orderID'],
-        allStatuses[updatedOrder['orderStatus']]
-    )
+
     res = orders.find_one({"orderID": updatedOrder['orderID']})
     if res is None:
-        print("Order was not found")
+        print("[Update Order]: Order id %d was not found" %updatedOrder['orderID'])
         return
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
-    
-    sendEmail(orderLoaded['buyerContactDetails'],"Your order updated!",content)
+    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[res['orderStatus']])
+    content = generateNewOrderEmail(res)
+    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
 
 def generateNewOrderEmail(some_order):
     #Setup Email Template
     #load the file
     email = None
+    #not sure if its more beneficial to do a deep copy of the template tree
     with open("./email-template.html") as inf:
         template = inf.read()
         email = bs4.BeautifulSoup(template,features="html.parser")
 
-    
+    email_summary = email.find("span",id="email-summary")
+    congo_type = email.find("td",id="congo-type")
     buyer_email = email.find("td",id="buyer-email")
     seller_email = email.find("td",id="seller-email")
     timestamp = email.find("td",id="timestamp")
@@ -184,6 +192,11 @@ def generateNewOrderEmail(some_order):
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
 
+    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],some_order['orderStatus']))
+    email_summary.append(email.new_tag('br'))
+    email_summary.append(email.new_tag('br'))
+    email_summary.append(email.new_tag('br'))
+    congo_type.append(some_order['congoType'])
     item_photo['src'] = some_order['imageLink']
     price.append('Ξ')
     price.append(str(float(some_order['total']) / float(some_order['quantity'])))
@@ -192,21 +205,15 @@ def generateNewOrderEmail(some_order):
     quantity.append(str(some_order['quantity']))
     order_num.append(str(some_order['orderID']))
     timestamp.append(some_order['listingTimestamp'])
-
     seller_email.append(some_order['sellerContactDetails'])
     seller_email.append(email.new_tag('br'))
-    print(seller_email.contents)
     seller_email.append(some_order['sellerAddress'])
-    print(seller_email.contents)
-
     buyer_email.append(some_order['buyerContactDetails'])
     buyer_email.append(email.new_tag('br'))
-    print(buyer_email.contents)
     buyer_email.append(some_order['buyerAddress'])
-    print(buyer_email.contents)
     total.append('Ξ')
     total.append(str(some_order['total']))
-    order_status.append("Processing")
+    order_status.append(some_order['orderStatus'])
 
     return str(email)
 
@@ -215,18 +222,18 @@ order_foo = {
     'quantity': 2,
     'prodName': "iPhone X",
     'orderID': 15,
-    'listingTimestamp': "December 12, 2019 10:40PM",
+    'listingTimestamp': str(datetime.datetime.utcnow()),
     'buyerContactDetails':'kentkfeng@gmail.com',
     'buyerAddress':"0xf00add",
-    'sellerContactDetails': "seller@email.com",
+    'sellerContactDetails': "kentkfeng@gmail.com",
     'sellerAddress': "0xf3sdj93j9sdjggndml",
-    'imageLink': "https://i.imgur.com/H7vkovB.png"
+    'imageLink': "https://i.imgur.com/H7vkovB.png",
+    'orderStatus': "Exception",
+    'congoType': ("%s Your order has updated!" % (statusToEmoji['Exception']))
 }
 # need to add seller contact/address, and image link attributes from mongo.
 content = generateNewOrderEmail(order_foo)
-sendEmail("kentkfeng@gmail.com","Your order has updated!",content)
-
-
+sendEmail("kentkfeng@gmail.com",order_foo['congoType'],content)
 
 
 def eventMap(filters,poll_interval):
