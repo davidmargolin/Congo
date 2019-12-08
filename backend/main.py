@@ -12,6 +12,7 @@ from pymongo import MongoClient
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import bs4
 import re
 from dotenv import load_dotenv
 load_dotenv()
@@ -36,7 +37,7 @@ orders = client.Congo.orders
 
 app=Flask(__name__)
 CORS(app)
-
+isProd = True
 if (isProd):
     CONTRACT_ADDRESS='0xb0D2655EEF43b018EEf0bd5691cfFfB96d4D0702'
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
@@ -44,14 +45,26 @@ if (isProd):
         info_json = json.load(f)
         congo_abi = info_json["abi"]
 else:
+    print("DEVELOPMENT MODE")
     CONTRACT_ADDRESS='0x6BDA1B6D18CBda0D093DE85327262960213A35a2'
     w3=Web3(HTTPProvider('http://localhost:7545'))
     with open("../contracts/contracts/build/contracts/Congo.json") as f:
         info_json = json.load(f)
         congo_abi = info_json["abi"]
-    
-contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
-accounts=w3.eth.accounts
+
+def getContract():
+    print("getting contract..")
+    contract = None
+    try:
+        contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
+    except requests.exceptions.ConnectionError(e, request=request):
+        print("exception raised",e)
+        print("sleeping for a bit..")
+        time.sleep(10)
+        return getContract()
+    return contract
+
+contract = getContract()
 
 #Email Confirmation Service
 def sendEmail(toEmail,sub,content):
@@ -124,6 +137,7 @@ def putNewOrder(event):
         newOrder['prodName'],
         newOrder['total']
     )
+    content = generateNewOrderEmail(newOrder)
     sendEmail(newOrder['sellerContactDetails'],"You have a new order!",content)
     print("seller has been notified of new order")
 
@@ -149,6 +163,65 @@ def updateOrder(event):
     print(orderLoaded)
     
     sendEmail(orderLoaded['buyerContactDetails'],"Your order updated!",content)
+
+def generateNewOrderEmail(some_order):
+    #Setup Email Template
+    #load the file
+    email = None
+    with open("./email-template.html") as inf:
+        template = inf.read()
+        email = bs4.BeautifulSoup(template,features="html.parser")
+
+    a_break = email.new_tag('br')
+    buyer_email = email.find("td",id="buyer-email")
+    seller_email = email.find("td",id="seller-email")
+    timestamp = email.find("td",id="timestamp")
+    order_num = email.find("a",id="order-number")
+    quantity = email.find("td",id="quantity")
+    price = email.find("span",id="price")
+    item_name = email.find("span",id="item-name")
+    item_photo = email.find('img',id="item-photo")
+    total = email.find("td",id="total")
+
+    item_photo['src'] = ""
+    price.append('Ξ')
+    price.append(str(float(some_order['total']) / float(some_order['quantity'])))
+    item_name.append(some_order['prodName'])
+    quantity.append("Quantity ")
+    quantity.append(str(some_order['quantity']))
+    order_num.append(str(some_order['orderID']))
+    timestamp.append(some_order['listingTimestamp'])
+    seller_email.append(some_order['sellerContactDetails'])
+    seller_email.append(a_break)
+    print(seller_email.contents)
+    seller_email.append(some_order['sellerAddress'])
+    print(seller_email.contents)
+    buyer_email.append(some_order['buyerContactDetails'])
+    buyer_email.append(a_break)
+    print(buyer_email.contents)
+    buyer_email.append(some_order['buyerAddress'])
+    print(buyer_email.contents)
+    total.append('Ξ')
+    total.append(str(some_order['total']))
+
+    return str(email)
+
+order_foo = {
+    'total': 100,
+    'quantity': 2,
+    'prodName': "iPhone X",
+    'orderID': 15,
+    'listingTimestamp': "December 12, 2019 10:40PM",
+    'buyerContactDetails':'kentkfeng@gmail.com',
+    'buyerAddress':"0xf00add",
+    'sellerContactDetails': 'seller@email.com',
+    'sellerAddress': '0xf3sdj93j9sdjggndml'
+}
+
+content = generateNewOrderEmail(order_foo)
+sendEmail("kentkfeng@gmail.com","Your order has updated!",content)
+
+
 
 
 def eventMap(filters,poll_interval):
