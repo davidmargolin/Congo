@@ -217,23 +217,23 @@ def generateNewOrderEmail(some_order):
 
     return str(email)
 
-order_foo = {
-    'total': 100,
-    'quantity': 2,
-    'prodName': "iPhone X",
-    'orderID': 15,
-    'listingTimestamp': str(datetime.datetime.utcnow()),
-    'buyerContactDetails':'kentkfeng@gmail.com',
-    'buyerAddress':"0xf00add",
-    'sellerContactDetails': "kentkfeng@gmail.com",
-    'sellerAddress': "0xf3sdj93j9sdjggndml",
-    'imageLink': "https://i.imgur.com/H7vkovB.png",
-    'orderStatus': "Exception",
-    'congoType': ("%s Your order has updated!" % (statusToEmoji['Exception']))
-}
-# need to add seller contact/address, and image link attributes from mongo.
-content = generateNewOrderEmail(order_foo)
-sendEmail("kentkfeng@gmail.com",order_foo['congoType'],content)
+# order_foo = {
+#     'total': 100,
+#     'quantity': 2,
+#     'prodName': "iPhone X",
+#     'orderID': 15,
+#     'listingTimestamp': str(datetime.datetime.utcnow()),
+#     'buyerContactDetails':'kentkfeng@gmail.com',
+#     'buyerAddress':"0xf00add",
+#     'sellerContactDetails': "kentkfeng@gmail.com",
+#     'sellerAddress': "0xf3sdj93j9sdjggndml",
+#     'imageLink': "https://i.imgur.com/H7vkovB.png",
+#     'orderStatus': "Exception",
+#     'congoType': ("%s Your order has updated!" % (statusToEmoji['Exception']))
+# }
+# # need to add seller contact/address, and image link attributes from mongo.
+# content = generateNewOrderEmail(order_foo)
+# sendEmail("kentkfeng@gmail.com",order_foo['congoType'],content)
 
 
 def eventMap(filters,poll_interval):
