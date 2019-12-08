@@ -172,7 +172,7 @@ def generateNewOrderEmail(some_order):
         template = inf.read()
         email = bs4.BeautifulSoup(template,features="html.parser")
 
-    a_break = email.new_tag('br')
+    
     buyer_email = email.find("td",id="buyer-email")
     seller_email = email.find("td",id="seller-email")
     timestamp = email.find("td",id="timestamp")
@@ -182,8 +182,9 @@ def generateNewOrderEmail(some_order):
     item_name = email.find("span",id="item-name")
     item_photo = email.find('img',id="item-photo")
     total = email.find("td",id="total")
+    order_status = email.find("td",id="order-status")
 
-    item_photo['src'] = ""
+    item_photo['src'] = some_order['imageLink']
     price.append('Ξ')
     price.append(str(float(some_order['total']) / float(some_order['quantity'])))
     item_name.append(some_order['prodName'])
@@ -191,18 +192,21 @@ def generateNewOrderEmail(some_order):
     quantity.append(str(some_order['quantity']))
     order_num.append(str(some_order['orderID']))
     timestamp.append(some_order['listingTimestamp'])
+
     seller_email.append(some_order['sellerContactDetails'])
-    seller_email.append(a_break)
+    seller_email.append(email.new_tag('br'))
     print(seller_email.contents)
     seller_email.append(some_order['sellerAddress'])
     print(seller_email.contents)
+
     buyer_email.append(some_order['buyerContactDetails'])
-    buyer_email.append(a_break)
+    buyer_email.append(email.new_tag('br'))
     print(buyer_email.contents)
     buyer_email.append(some_order['buyerAddress'])
     print(buyer_email.contents)
     total.append('Ξ')
     total.append(str(some_order['total']))
+    order_status.append("Processing")
 
     return str(email)
 
@@ -214,10 +218,11 @@ order_foo = {
     'listingTimestamp': "December 12, 2019 10:40PM",
     'buyerContactDetails':'kentkfeng@gmail.com',
     'buyerAddress':"0xf00add",
-    'sellerContactDetails': 'seller@email.com',
-    'sellerAddress': '0xf3sdj93j9sdjggndml'
+    'sellerContactDetails': "seller@email.com",
+    'sellerAddress': "0xf3sdj93j9sdjggndml",
+    'imageLink': "https://i.imgur.com/H7vkovB.png"
 }
-
+# need to add seller contact/address, and image link attributes from mongo.
 content = generateNewOrderEmail(order_foo)
 sendEmail("kentkfeng@gmail.com","Your order has updated!",content)
 
