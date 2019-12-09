@@ -1,9 +1,8 @@
 import React, { useState, useRef, useContext } from "react";
 import { abi } from "../../assets/contract.json";
-import  { Redirect } from 'react-router-dom';
+import { Redirect } from "react-router-dom";
 import Web3 from "web3";
 import { EthereumContext } from "../../context/EthereumContext";
-//Ropsten address network   ==> Change network address if we need to
 
 //Kendrick's local enviroment, ignore
 //const CONTRACT_ADDRESS = "0x5Cf63b99F134B99F5260599f620fb26eA7d3bf91";
@@ -22,17 +21,16 @@ const makeListing = (
   const { CONTRACT_ADDRESS, chosenAccount } = accountInfo;
 
   const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-  console.log(quantity, price, details, name, sellerEmail, chosenAccount);
-  // contract.methods
-  //   .createListing(quantity, price, details, name, sellerEmail)
-  //   .send({ from: chosenAccount })
-  //   .then(response => {
-  //     console.log(response);
-  //     setConfirmation(true);
-  //   })
-  //   .catch(error => {
-  //     console.log(error);
-  //   });
+  contract.methods
+    .createListing(quantity, price, details, name, sellerEmail)
+    .send({ from: chosenAccount })
+    .then(response => {
+      console.log(response);
+      setConfirmation(true);
+    })
+    .catch(error => {
+      console.log(error);
+    });
 };
 
 const CreateListingPage = ({ history }) => {
@@ -46,41 +44,35 @@ const CreateListingPage = ({ history }) => {
 
   if (confirmation) return <Redirect to="confirmationPage"></Redirect>;
 
-  //const web3 = new Web3(window.ethereum);
-  //console.log(new Web3(window.ethereum).utils.toWei("100", "Ether"));
-
   return (
     <div
       style={{
         display: "flex",
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "center"
       }}
     >
-
       <form
         style={{
           display: "flex",
           flex: 1,
           flexDirection: "column",
           justifyContent: "space-evenly",
-          maxWidth: 300,
+          maxWidth: 800,
           minHeight: 600,
-          padding: "30px",
-          border: "2px solid black"
+          padding: 12
         }}
-
         onSubmit={event => {
           event.preventDefault();
 
           const productPrice = new Web3(window.ethereum).utils.toWei(
-            price.value.toString(),
+            price.current.value.toString(),
             "Ether"
           );
 
           //ID will be auto generated in smart contract
           makeListing(
-            name.value,
+            name.current.value,
             productPrice,
             quantity.current.value,
             details.current.value,
@@ -93,76 +85,94 @@ const CreateListingPage = ({ history }) => {
         <span
           style={{
             fontSize: 16
-          }}  
+          }}
         >
           Creating a listing is easy! Just fill out the form and hit submit!
-
         </span>
         <input
           id="productName"
           type="text"
-          ref={input => {
-            setName(input);
-          }}
+          ref={name}
           placeholder="Product name..."
           required
         />
-        <input
-          id="productPrice"
-          type="text"
-          ref={input => {
-            setPrice(input);
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap"
           }}
-          placeholder="Product price..."
-          required
-        />
-        <input
-          id="productQuantity"
-          type="text"
-          ref={input => {
-            setQuantity(input);
-          }}
-          placeholder="Product quantity..."
-          required
-        />
-        <input
+        >
+          <input
+            style={{ display: "flex", flex: 1, marginRight: 8 }}
+            id="productPrice"
+            min={0}
+            type="number"
+            ref={price}
+            placeholder="Product price (in Ether)..."
+            required
+          />
+          <input
+            style={{ display: "flex", flex: 1, marginRight: 8 }}
+            id="productQuantity"
+            type="number"
+            min={0}
+            ref={quantity}
+            placeholder="Product quantity..."
+            required
+          />
+        </span>
+
+        <textarea
           id="productDescription"
           type="text"
-          ref={input => {
-            setDetails(input);
-          }}
+          rows="5"
+          style={{ padding: 8 }}
+          ref={details}
           placeholder="Product description..."
           required
         />
 
         <span>
-          It is reccomended to use a burner email and not your personal email. You can find one  
-          <a href="https://temp-mail.org/en/" rel="noopener noreferrer" target="_blank"> here.</a>
+          It is recommended to use a burner email and not your personal email.
+          You can find one{" "}
+          <a
+            href="https://temp-mail.org/en/"
+            rel="noopener noreferrer"
+            target="_blank"
+            style={{
+              textDecoration: "underline",
+              color: "blue"
+            }}
+          >
+            here.
+          </a>
         </span>
         <input
           id="sellerEmail"
           type="email"
-          ref={input => {
-            setSellerEmail(input);
-          }}
+          ref={email}
           placeholder="Your email address..."
           required
         />
-        <button 
-          style={{
-            color: "rbg(0, 0, 0)",
-            fontSize: "16px",
-            fontFamily: "Times New Roman",
-            backgroundColor: "#f9de9f",
-            padding: "5px",
-            border: "1px solid black"
-          }}
-          type="submit"> Submit product! </button>
+        <div style={{ justifyContent: "flex-end", display: "flex" }}>
+          <button
+            style={{
+              color: "rbg(0, 0, 0)",
+              fontSize: 16,
+              backgroundColor: "#f9de9f",
+              padding: 6,
+              border: "1px solid black"
+            }}
+            type="submit"
+          >
+            Submit Product
+          </button>
+        </div>
       </form>
     </div>
-    )
-}
-
+  );
+};
 
 export default CreateListingPage;
 

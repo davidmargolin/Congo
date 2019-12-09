@@ -16,7 +16,7 @@ const Ethereum = ({ children }) => {
   const [isEthereumBrowser, setIsEthereumBrowser] = useState(true);
 
   useEffect(() => {
-    if (window.ethereum != undefined) {
+    if (window.ethereum !== undefined) {
       const web3 = new Web3(window.ethereum);
 
       web3.eth.net.getId().then(id => {
@@ -76,7 +76,14 @@ const Ethereum = ({ children }) => {
             margin: 2
           }}
         >
-          <div style={{ flexWrap: "wrap", display: "flex" }}>
+          <div
+            style={{
+              flexWrap: "wrap",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             <Link to="/createListing">
               <span
                 style={{
