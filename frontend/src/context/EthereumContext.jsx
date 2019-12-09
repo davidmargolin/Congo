@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { abi } from "../../assets/contract.json";
+import { abi } from "../assets/contract.json";
 import Web3 from "web3";
 import SearchBar from "../components/SearchBar";
 import { Link } from "react-router-dom";
