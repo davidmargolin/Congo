@@ -12,6 +12,7 @@ from pymongo import MongoClient
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import bs4
 import re
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,6 +31,15 @@ allStatuses = {
     "4": "Exception"
 }
 
+statusToEmoji = {
+    "Listed": "✏️",
+    "Processing": "💸",
+    "Shipped" : "🚚💨",
+    "Complete": "📦",
+    "Exception": "⛔"
+}
+
+
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
@@ -46,14 +56,26 @@ if (isProd):
         print(CONTRACT_ADDRESS)
         congo_abi = info_json["abi"]
 else:
-    CONTRACT_ADDRESS = ''
+    print("DEVELOPMENT MODE")
+    CONTRACT_ADDRESS='0x6BDA1B6D18CBda0D093DE85327262960213A35a2'
     w3=Web3(HTTPProvider('http://localhost:7545'))
     with open("../contracts/contracts/build/contracts/Congo.json") as f:
         info_json = json.load(f)
         congo_abi = info_json["abi"]
-    
-contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
-accounts=w3.eth.accounts
+
+def getContract():
+    print("getting contract..")
+    contract = None
+    try:
+        contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
+    except requests.exceptions.ConnectionError(e, request=request):
+        print("exception raised",e)
+        print("sleeping for a bit..")
+        time.sleep(10)
+        return getContract()
+    return contract
+
+contract = getContract()
 
 #Email Confirmation Service
 def sendEmail(toEmail,sub,content):
@@ -117,17 +139,17 @@ def putNewOrder(event):
     newOrder['listingTimestamp'] = datetime.datetime.utcnow()
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
-    content = "Order #: %s | Status: %s | %s (%s) purchased %sx of %s, you got paid %s wei" % (
-        newOrder['orderID'],
-        allStatuses[newOrder['orderStatus']],
-        newOrder['buyerContactDetails'],
-        newOrder['buyerAddress'],
-        newOrder['quantity'],
-        newOrder['prodName'],
-        newOrder['total']
-    )
-    sendEmail(newOrder['sellerContactDetails'],"You have a new order!",content)
-    print("seller has been notified of new order")
+
+    #fetch image link to attach to obj in order to generate email body
+    prodListing = products.find_one({"id": newOrder['orderID']})
+    if(prodListing is None):
+        newOrder['imageLink'] = "" # default no pic
+    else:
+        newOrder['imageLink'] = prodListing['imageLink'] 
+
+    newOrder['congoType'] = ("%s You have a new order!"% statusToEmoji[newOrder['orderStatus']])
+    content = generateNewOrderEmail(newOrder)
+    sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
 
 def updateOrder(event):
     updatedOrder = convertEvent(event)
@@ -139,19 +161,63 @@ def updateOrder(event):
         }
     })
 
-    content = "Order #: %s | Updated Status: %s " % (
-        updatedOrder['orderID'],
-        allStatuses[updatedOrder['orderStatus']]
-    )
+
     res = orders.find_one({"orderID": updatedOrder['orderID']})
     if res is None:
-        print("Order was not found")
+        print("[Update Order]: Order id %d was not found" %updatedOrder['orderID'])
         return
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
-    
-    sendEmail(orderLoaded['buyerContactDetails'],"Your order updated!",content)
+    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[res['orderStatus']])
+    content = generateNewOrderEmail(res)
+    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
 
+def generateNewOrderEmail(some_order):
+    #Setup Email Template
+    #load the file
+    email = None
+    #not sure if its more beneficial to do a deep copy of the template tree
+    with open("./email-template.html") as inf:
+        template = inf.read()
+        email = bs4.BeautifulSoup(template,features="html.parser")
+    if email is None:
+        print("[Email Service]: Problems opening email template file.")
+        return
+
+    email_summary = email.find("span",id="email-summary")
+    congo_type = email.find("td",id="congo-type")
+    buyer_email = email.find("td",id="buyer-email")
+    seller_email = email.find("td",id="seller-email")
+    timestamp = email.find("td",id="timestamp")
+    order_num = email.find("a",id="order-number")
+    quantity = email.find("td",id="quantity")
+    price = email.find("span",id="price")
+    item_name = email.find("span",id="item-name")
+    item_photo = email.find('img',id="item-photo")
+    total = email.find("td",id="total")
+    order_status = email.find("td",id="order-status")
+
+    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],some_order['orderStatus']))
+    congo_type.append(some_order['congoType'])
+    item_photo['src'] = some_order['imageLink']
+    price.append('Ξ')
+    price.append(str(float(some_order['total']) / float(some_order['quantity'])))
+    item_name.append(some_order['prodName'])
+    quantity.append("Quantity ")
+    quantity.append(str(some_order['quantity']))
+    order_num.append(str(some_order['orderID']))
+    timestamp.append(some_order['listingTimestamp'])
+    seller_email.append(some_order['sellerContactDetails'])
+    seller_email.append(email.new_tag('br'))
+    seller_email.append(some_order['sellerAddress'])
+    buyer_email.append(some_order['buyerContactDetails'])
+    buyer_email.append(email.new_tag('br'))
+    buyer_email.append(some_order['buyerAddress'])
+    total.append('Ξ')
+    total.append(str(some_order['total']))
+    order_status.append(some_order['orderStatus'])
+
+    return str(email)
 
 def eventMap(filters,poll_interval):
     print("started worker thread!")
