@@ -16,16 +16,15 @@ const Ethereum = ({ children }) => {
   const [isEthereumBrowser, setIsEthereumBrowser] = useState(true);
   const [methods, setMethods] = useState(null);
   useEffect(() => {
+    setIsEthereumBrowser(window.ethereum !== undefined);
     if (window.ethereum !== undefined) {
       const web3 = new Web3(window.ethereum);
-
       web3.eth.net.getId().then(id => {
+        setIsSameNetwork(id === CONTRACT_NETWORK_ID);
         if (id === CONTRACT_NETWORK_ID) {
           window.ethereum
             .enable()
             .then(() => {
-              const web3 = new Web3(window.ethereum);
-              console.log(web3.eth.accounts);
               web3.eth.getAccounts().then(accs => {
                 setAccounts(accs);
                 setChosenAccount(accs.length > 0 ? accs[0] : null);
@@ -36,12 +35,8 @@ const Ethereum = ({ children }) => {
             .catch(error => {
               console.log(error);
             });
-        } else {
-          setIsSameNetwork(false);
         }
       });
-    } else {
-      setIsEthereumBrowser(false);
     }
   }, []);
 
