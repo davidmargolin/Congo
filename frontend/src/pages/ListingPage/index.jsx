@@ -1,47 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { abi } from "../../assets/contract.json";
-import Web3 from "web3";
+import { EthereumContext } from "../../context/EthereumContext.jsx";
 
 const getListing = id =>
   fetch(
     `https://congo-mart.herokuapp.com/listing/${encodeURIComponent(id)}`
   ).then(res => res.json());
 
-const CONTRACT_ADDRESS = "0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607";
-
-const makePurchase = (id, price, quantity, email) => {
-  if (window.ethereum) {
-    window.ethereum
-      .enable()
-      .then(() => {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-        web3.eth.getAccounts().then(accounts => {
-          const transaction = contract.methods.createOrder(
-            id,
-            quantity,
-            CONTRACT_ADDRESS,
-            email
-          );
-
-          transaction
-            .send({
-              from: web3.currentProvider.selectedAddress || accounts[0],
-              value: price
-            })
-            .then(response => console.log(response));
-        });
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
-};
-
 const ListingPage = () => {
   const { listingID } = useParams();
   const [listingData, setListingData] = useState(null);
+  const { chosenAccount, methods } = useContext(EthereumContext);
+  const email = useRef();
+
   useEffect(() => {
     getListing(listingID).then(data => {
       setListingData(data);
@@ -77,13 +48,63 @@ const ListingPage = () => {
             View Seller Info
           </a>
           <p>{listingData.details}</p>
-          <button
-            onClick={() =>
-              makePurchase(listingID, listingData.price, 1, "test@test.com")
-            }
+          <form
+            style={{
+              display: "flex",
+              flex: 1,
+              flexDirection: "column",
+              justifyContent: "space-evenly",
+              maxWidth: 800,
+              minHeight: 600,
+              padding: 12
+            }}
+            onSubmit={event => {
+              event.preventDefault();
+
+              methods
+                .createOrder(listingID, 1, "", email.current.value)
+                .send({
+                  from: chosenAccount,
+                  value: listingData.price
+                })
+                .then(response => console.log(response));
+            }}
           >
-            Buy Now
-          </button>
+            <span>
+              It is recommended to use a burner email and not your personal
+              email. You can find one{" "}
+              <a
+                href="https://temp-mail.org/en/"
+                rel="noopener noreferrer"
+                target="_blank"
+                style={{
+                  textDecoration: "underline",
+                  color: "blue"
+                }}
+              >
+                here.
+              </a>
+            </span>
+            <input
+              id="buyerEmail"
+              type="email"
+              ref={email}
+              placeholder="Your email address..."
+              required
+            />
+            <button
+              style={{
+                color: "rbg(0, 0, 0)",
+                fontSize: 16,
+                backgroundColor: "#f9de9f",
+                padding: 6,
+                border: "1px solid black"
+              }}
+              type="submit"
+            >
+              Buy Now
+            </button>
+          </form>
         </div>
       </div>
     </span>

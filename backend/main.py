@@ -48,10 +48,12 @@ app=Flask(__name__)
 CORS(app)
 
 if (isProd):
-    CONTRACT_ADDRESS='0xb0D2655EEF43b018EEf0bd5691cfFfB96d4D0702'
+    NETWORK_ID="3"
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
     with open("./contract.json") as f:
         info_json = json.load(f)
+        CONTRACT_ADDRESS = info_json["networks"][NETWORK_ID]["address"]
+        print(CONTRACT_ADDRESS)
         congo_abi = info_json["abi"]
 else:
     print("DEVELOPMENT MODE")
