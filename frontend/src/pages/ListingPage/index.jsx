@@ -61,7 +61,8 @@ const ListingPage = () => {
             onSubmit={event => {
               event.preventDefault();
 
-              methods.createOrder(listingID, 1, email.current.value)
+              methods
+                .createOrder(listingID, 1, "", email.current.value)
                 .send({
                   from: chosenAccount,
                   value: listingData.price

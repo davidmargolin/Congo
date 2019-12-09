@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { abi } from "../assets/contract.json";
+import { abi, networks } from "../assets/contract.json";
 import Web3 from "web3";
 import SearchBar from "../components/SearchBar";
 import { Link } from "react-router-dom";
 
 const CONTRACT_NETWORK_ID = 3;
-const CONTRACT_ADDRESS = "0xD95F794BA7686bf0944b7Eb6fa7311BdeC762607";
+const CONTRACT_ADDRESS = networks[CONTRACT_NETWORK_ID].address;
 
 export const EthereumContext = React.createContext();
 
