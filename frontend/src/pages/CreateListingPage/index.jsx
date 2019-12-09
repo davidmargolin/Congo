@@ -12,6 +12,7 @@ const makeListing = (
   price,
   quantity,
   details,
+  imageURL,
   sellerEmail,
   setConfirmation,
   accountInfo
@@ -19,7 +20,7 @@ const makeListing = (
   const { chosenAccount, methods } = accountInfo;
 
   methods
-    .createListing(quantity, price, details, name, sellerEmail)
+    .createListing(quantity, price, details, name, imageURL, sellerEmail)
     .send({ from: chosenAccount })
     .then(response => {
       console.log(response);
@@ -34,6 +35,7 @@ const CreateListingPage = () => {
   const name = useRef();
   const price = useRef();
   const quantity = useRef();
+  const image = useRef();
   const details = useRef();
   const email = useRef();
   const accountInfo = useContext(EthereumContext);
@@ -73,6 +75,7 @@ const CreateListingPage = () => {
             productPrice,
             quantity.current.value,
             details.current.value,
+            image.current.value,
             email.current.value,
             setConfirmation,
             accountInfo
@@ -91,6 +94,13 @@ const CreateListingPage = () => {
           type="text"
           ref={name}
           placeholder="Product name..."
+          required
+        />
+        <input
+          id="productImage"
+          type="url"
+          ref={image}
+          placeholder="Link to product image..."
           required
         />
         <span
