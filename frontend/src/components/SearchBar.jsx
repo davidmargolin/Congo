@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
-import account from "../assets/user.svg";
 import { Link, withRouter } from "react-router-dom";
 
 const SearchBar = ({ history }) => {
@@ -9,25 +8,25 @@ const SearchBar = ({ history }) => {
     <div
       style={{
         display: "flex",
-        padding: 40,
-        backgroundColor: "#c0c0c0",
         justifyContent: "center",
         alignItems: "center",
-        flexWrap: "wrap"
+        paddingHorizontal: 30,
+        flexWrap: "wrap",
+        flex: 1
       }}
     >
       <Link to="/">
-        <img src={logo} style={{ height: 90, margin: 6 }} />
+        <img src={logo} alt="Congo Logo" style={{ height: 90, margin: 6 }} />
       </Link>
+      <span style={{ width: 30 }} />
       <div
         style={{
-          display: "flex",
-          flexWrap: "nowrap",
+          padding: 24,
           justifyContent: "center",
           alignItems: "center",
-          marginLeft: 20,
+          flex: 1,
           maxWidth: 800,
-          flex: 1
+          display: "flex"
         }}
       >
         <input
@@ -35,22 +34,24 @@ const SearchBar = ({ history }) => {
           style={{
             height: 20,
             flex: 1,
-            fontSize: 18,
-            padding: 12
+            fontSize: 16,
+            padding: 14,
+            borderStyle: "solid",
+            borderColor: 'black',
+            borderWidth: 0,
+            borderRadius: 20,
+            boxShadow: "0px 0px 4px grey"
           }}
           placeholder="Search for products..."
           onChange={e => {
             setQuery(e.target.value);
           }}
           onKeyPress={e => {
-            if (e.keyCode == 13 || e.which === 13) {
+            if (e.keyCode === 13 || e.which === 13) {
               history.push(`/search/${query}`);
             }
           }}
         />
-        <Link to="/account">
-          <img src={account} style={{ height: 50, margin: 12 }} />
-        </Link>
       </div>
     </div>
   );
