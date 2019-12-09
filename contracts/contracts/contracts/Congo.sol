@@ -27,8 +27,8 @@ contract Congo {
 		uint quantity;
 		uint256 price;
 		string details;
-		string imageLink;
 		string name;
+		string imageLink;
 		address payable owner;
 		string sellerContactDetails;
 	}
@@ -38,8 +38,8 @@ contract Congo {
 		uint quantity,
 		uint256 price,
 		string details,
-		string imageLink,
 		string name,
+		string imageLink,
 		address payable owner,
 		string sellerContactDetails
 	);
