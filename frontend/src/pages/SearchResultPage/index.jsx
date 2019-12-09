@@ -45,8 +45,8 @@ const SearchResultPage = () => {
           justifyContent: "center"
         }}
       >
-        {listings.map(({ name, image, price, id }) => (
-          <Listing title={name} image={image} price={price} id={id} />
+        {listings.map(({ name, price, id, imageLink }) => (
+          <Listing title={name} image={imageLink} price={price} id={id} />
         ))}
       </div>
     </span>
