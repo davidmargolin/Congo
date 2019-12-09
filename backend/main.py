@@ -136,12 +136,12 @@ def updateListing(event):
     })
 def putNewOrder(event):    
     newOrder = convertEvent(event)
-    newOrder['listingTimestamp'] = datetime.datetime.utcnow()
+    newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
 
     #fetch image link to attach to obj in order to generate email body
-    prodListing = products.find_one({"id": newOrder['orderID']})
+    prodListing = products.find_one({"id": newOrder['prodID']})
     if(prodListing is None):
         newOrder['imageLink'] = "" # default no pic
     else:
