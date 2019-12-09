@@ -21,8 +21,8 @@ const SearchBar = ({ history }) => {
       </Link>
       <div
         style={{
-          display: "flex",
-          flexWrap: "nowrap",
+          flex: 1,
+          padding: 30,
           justifyContent: "center",
           alignItems: "center",
           marginLeft: 20,

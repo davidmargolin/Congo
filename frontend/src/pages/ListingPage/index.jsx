@@ -24,8 +24,9 @@ const makePurchase = (id, price, quantity, email) => {
             CONTRACT_ADDRESS,
             email
           );
+          //localhost:3000/
 
-          transaction
+          http: transaction
             .send({
               from: web3.currentProvider.selectedAddress || accounts[0],
               value: price
