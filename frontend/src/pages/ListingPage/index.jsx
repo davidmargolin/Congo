@@ -39,11 +39,11 @@ const ListingPage = () => {
           justifyContent: "flex-start"
         }}
       >
-        <img src={listingData.image} style={{ width: 400, height: 400 }} />
+        <img src={listingData.imageLink} style={{ width: 400, height: 400 }} />
         <br />
         <div style={{ flex: 1, marginLeft: 40 }}>
           <h3>{listingData.name}</h3>
-          <p>{listingData.price}</p>
+          <p>{listingData.price / 1000000000000000000} ETH</p>
           <a href={`https://ropsten.etherscan.io/address/${listingData.owner}`}>
             View Seller Info
           </a>
@@ -55,8 +55,7 @@ const ListingPage = () => {
               flexDirection: "column",
               justifyContent: "space-evenly",
               maxWidth: 800,
-              minHeight: 600,
-              padding: 12
+              minHeight: 200
             }}
             onSubmit={event => {
               event.preventDefault();
@@ -92,18 +91,21 @@ const ListingPage = () => {
               placeholder="Your email address..."
               required
             />
-            <button
-              style={{
-                color: "rbg(0, 0, 0)",
-                fontSize: 16,
-                backgroundColor: "#f9de9f",
-                padding: 6,
-                border: "1px solid black"
-              }}
-              type="submit"
-            >
-              Buy Now
-            </button>
+
+            <div style={{ justifyContent: "flex-end", display: "flex" }}>
+              <button
+                style={{
+                  color: "rbg(0, 0, 0)",
+                  fontSize: 16,
+                  backgroundColor: "#f9de9f",
+                  padding: 6,
+                  border: "1px solid black"
+                }}
+                type="submit"
+              >
+                Buy Now
+              </button>
+            </div>
           </form>
         </div>
       </div>
