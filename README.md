@@ -1,4 +1,5 @@
-## 🥦 Congo
+<img width=250 src="/frontend/src/assets/logo.png"/>
+
 ###### _marketplace without the middleman_
 
 
