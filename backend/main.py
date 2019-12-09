@@ -197,7 +197,7 @@ def generateNewOrderEmail(some_order):
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
 
-    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],some_order['orderStatus']))
+    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
     item_photo['src'] = some_order['imageLink']
     price.append('Ξ')
@@ -215,8 +215,8 @@ def generateNewOrderEmail(some_order):
     buyer_email.append(some_order['buyerAddress'])
     total.append('Ξ')
     total.append(str(some_order['total']))
-    order_status.append(some_order['orderStatus'])
-
+    order_status.append(allStatuses[some_order['orderStatus']])
+    
     return str(email)
 
 def eventMap(filters,poll_interval):
