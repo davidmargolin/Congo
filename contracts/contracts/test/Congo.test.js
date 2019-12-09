@@ -29,7 +29,7 @@ contract('Congo', ([deployer, seller, buyer]) => {
     let result, productCount
 
     before(async () => {
-      result = await congo.createListing(1,web3.utils.toWei('2.5','ether'),"best iPhone ever.","https://www.imgur.com/a/imageid1","iPhone X","kentkfeng@gmail.com",{from: seller})
+      result = await congo.createListing(1,web3.utils.toWei('2.5','ether'),"best iPhone ever.","iPhone X","https://www.imgur.com/a/imageid1","kentkfeng@gmail.com",{from: seller})
       productCount = await congo.productCount()
     })
 
