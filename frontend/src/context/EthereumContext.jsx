@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { abi } from "../../assets/contract.json";
+import { abi } from "../../assets/contract.json";
 import Web3 from "web3";
 import SearchBar from "../components/SearchBar";
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ const Ethereum = ({ children }) => {
   const [chosenAccount, setChosenAccount] = useState("Choose Account");
   const [isSameNetwork, setIsSameNetwork] = useState(true);
   const [isEthereumBrowser, setIsEthereumBrowser] = useState(true);
-
+  const [methods, setMethods] = useState(null);
   useEffect(() => {
     if (window.ethereum !== undefined) {
       const web3 = new Web3(window.ethereum);
@@ -29,6 +29,8 @@ const Ethereum = ({ children }) => {
               web3.eth.getAccounts().then(accs => {
                 setAccounts(accs);
                 setChosenAccount(accs.length > 0 ? accs[0] : null);
+                const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+                setMethods(contract.methods);
               });
             })
             .catch(error => {
@@ -63,7 +65,7 @@ const Ethereum = ({ children }) => {
       <EthereumContext.Provider
         value={{
           chosenAccount,
-          CONTRACT_ADDRESS
+          methods
         }}
       >
         <div

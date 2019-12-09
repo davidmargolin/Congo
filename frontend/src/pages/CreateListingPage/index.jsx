@@ -1,5 +1,4 @@
 import React, { useState, useRef, useContext } from "react";
-import { abi } from "../../assets/contract.json";
 import { Redirect } from "react-router-dom";
 import Web3 from "web3";
 import { EthereumContext } from "../../context/EthereumContext";
@@ -17,11 +16,9 @@ const makeListing = (
   setConfirmation,
   accountInfo
 ) => {
-  const web3 = new Web3(window.ethereum);
-  const { CONTRACT_ADDRESS, chosenAccount } = accountInfo;
+  const { chosenAccount, methods } = accountInfo;
 
-  const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-  contract.methods
+  methods
     .createListing(quantity, price, details, name, sellerEmail)
     .send({ from: chosenAccount })
     .then(response => {
@@ -33,7 +30,7 @@ const makeListing = (
     });
 };
 
-const CreateListingPage = ({ history }) => {
+const CreateListingPage = () => {
   const name = useRef();
   const price = useRef();
   const quantity = useRef();
