@@ -114,7 +114,7 @@ const CreateListingPage = () => {
             style={{ display: "flex", flex: 1, marginRight: 8 }}
             id="productPrice"
             min={0}
-            type="number"
+            type="text"
             ref={price}
             placeholder="Product price (in Ether)..."
             required
