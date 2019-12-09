@@ -23,21 +23,7 @@ isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
 
-allStatuses = {
-    "0": "Listed",
-    "1": "Processing",
-    "2": "Shipped",
-    "3": "Complete",
-    "4": "Exception"
-}
-
-statusToEmoji = {
-    "Listed": "✏️",
-    "Processing": "💸",
-    "Shipped" : "🚚💨",
-    "Complete": "📦",
-    "Exception": "⛔"
-}
+statusToEmoji = ["✏️", "💸", "🚚💨","📦", "⛔"]
 
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
@@ -147,7 +133,7 @@ def putNewOrder(event):
     else:
         newOrder['imageLink'] = prodListing['imageLink'] 
 
-    newOrder['congoType'] = ("%s You have a new order!"% statusToEmoji[newOrder['orderStatus']])
+    newOrder['congoType'] = ("%s You have a new order!"% statusToEmoji[int(newOrder['orderStatus'])])
     content = generateNewOrderEmail(newOrder)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
 
@@ -168,7 +154,7 @@ def updateOrder(event):
         return
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
-    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[res['orderStatus']])
+    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
     content = generateNewOrderEmail(res)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
 
@@ -206,7 +192,7 @@ def generateNewOrderEmail(some_order):
     quantity.append("Quantity ")
     quantity.append(str(some_order['quantity']))
     order_num.append(str(some_order['orderID']))
-    timestamp.append(some_order['listingTimestamp'])
+    timestamp.append(str(some_order['listingTimestamp']))
     seller_email.append(some_order['sellerContactDetails'])
     seller_email.append(email.new_tag('br'))
     seller_email.append(some_order['sellerAddress'])
