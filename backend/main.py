@@ -23,6 +23,9 @@ isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
 NETWORK_ID="3"
+BASE_URL = "congo-frontend.herokuapp.com"
+ORDERS_URL = BASE_URL + "/user/orders"
+LISTINGS_URL = BASE_URL + "/user/listings"
 
 allStatuses = ["Listed","Processing","Shipped","Complete","Exception"]
 statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
@@ -200,6 +203,12 @@ def generateNewOrderEmail(some_order):
     item_photo = email.find('img',id="item-photo")
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
+    edit_button = email.find("a",id="edit-button")
+
+    #added link to view orders page
+    order_num['href'] = ORDERS_URL
+    #add link to view listings
+    edit_button['href'] = LISTINGS_URL
     
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
