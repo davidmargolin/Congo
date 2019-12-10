@@ -96,6 +96,7 @@ const Ethereum = ({ children }) => {
             <a
               href={"https://ropsten.etherscan.io/address/" + CONTRACT_ADDRESS}
               target="_blank"
+              rel="noopener noreferrer"
             >
               <span
                 style={{

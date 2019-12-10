@@ -20,6 +20,7 @@ const Docs = () => {
           style={{ color: "blue" }}
           target="_blank"
           href="https://github.com/davidmargolin/congo"
+          rel="noopener noreferrer"
         >
           the Congo Github repo.
         </a>

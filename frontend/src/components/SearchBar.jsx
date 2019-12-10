@@ -10,7 +10,7 @@ const SearchBar = ({ history }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: 40,
+        padding: 10,
         flexWrap: "wrap",
         flex: 1
       }}
