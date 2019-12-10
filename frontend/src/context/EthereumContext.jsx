@@ -70,7 +70,7 @@ const Ethereum = ({ children }) => {
             justifyContent: "flex-end",
             display: "flex",
             flexWrap: "wrap-reverse",
-            margin: 2
+            padding: 12
           }}
         >
           <div
