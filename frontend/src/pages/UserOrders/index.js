@@ -25,7 +25,7 @@ const UserOrders = () => {
         flexDirection: "column"
       }}
     >
-      <p>Your Orders:</p>
+      <p>{listings.length>0?"Your Orders:":"No orders found"}</p>
 
       <div
         style={{

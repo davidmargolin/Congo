@@ -266,7 +266,7 @@ def queryListingById(id):
 # returns all listings by name
 def queryListingsByName(name):
     regx = re.compile(name, re.I)
-    productResults = products.find({"name": regx}).sort({"listingTimestamp" :-1}).limit(20)
+    productResults = products.find({"name": regx}).limit(20)
     return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by owner
@@ -282,8 +282,8 @@ def queryListingsByBuyer(buyer):
     return list(map(dumpThenLoad, list(productResults)))
 
 # returns all orders by buyer
-def queryOrdersByBuyer(buyer):
-    orderResults = orders.find({"buyerAddress":buyer})
+def queryOrdersByBuyer(prodID, buyer):
+    orderResults = orders.find({"buyerAddress":buyer, "prodID": int(prodID)})
     return list(map(dumpThenLoad, list(orderResults)))
 
 def startWorkers():
@@ -307,7 +307,7 @@ def getListing(listingId):
     if listingId is not None:
         return jsonify({
             "listing": queryListingById(listingId),
-            "orders": [] if address is None else queryOrdersByBuyer(address)
+            "orders": [] if address is None else queryOrdersByBuyer(listingId, address)
         })
     else:
         return abort(400)
