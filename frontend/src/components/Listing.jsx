@@ -22,8 +22,8 @@ const Listing = ({ title, image, price, id }) => {
           src={image}
           style={{ width: "100%", height: 200, objectFit: "cover" }}
         />
-        <h2 style={{ marginTop: 4, marginBottom: 4, fontSize: 14, textAlign: 'start' }}>{title}</h2>
-        <p style={{ margin: 0 }}>{price / 1000000000000000000} ETH</p>
+        <h2 style={{ marginTop: 4, marginBottom: 4, fontSize: 14, textAlign: 'start', color: 'black' }}>{title}</h2>
+        <p style={{ margin: 0, color: 'black' }}>{price / 1000000000000000000} ETH</p>
       </button>
     </Link>
   );

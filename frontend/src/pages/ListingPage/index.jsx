@@ -78,18 +78,12 @@ const ListingPage = () => {
             <input
               id="buyerEmail"
               type="email"
+              style={{marginRight: 12}}
               ref={email}
               placeholder="Your email address..."
               required
             />
             <button
-              style={{
-                color: "rbg(0, 0, 0)",
-                fontSize: 16,
-                backgroundColor: "#f9de9f",
-                padding: 6,
-                border: "1px solid black"
-              }}
               type="submit"
             >
               Buy Now

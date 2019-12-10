@@ -155,26 +155,17 @@ const CreateListingPage = () => {
             here.
           </a>
         </span>
-        <input
-          id="sellerEmail"
-          type="email"
-          ref={email}
-          placeholder="Your email address..."
-          required
-        />
-        <div style={{ justifyContent: "flex-end", display: "flex" }}>
-          <button
-            style={{
-              color: "rbg(0, 0, 0)",
-              fontSize: 16,
-              backgroundColor: "#f9de9f",
-              padding: 6,
-              border: "1px solid black"
-            }}
-            type="submit"
-          >
-            Submit Product
-          </button>
+
+        <div style={{ display: "flex" }}>
+          <input
+            id="sellerEmail"
+            type="email"
+            ref={email}
+            style={{ marginRight: 12, flex: 1 }}
+            placeholder="Your email address..."
+            required
+          />
+          <button type="submit">Submit Product</button>
         </div>
       </form>
     </div>
