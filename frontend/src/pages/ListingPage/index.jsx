@@ -32,13 +32,23 @@ const ListingPage = () => {
     >
       <img
         src={listingData.imageLink}
-        style={{ padding: 12, width: 400, height: 400, objectFit: "contain" }}
+        style={{
+          padding: 12,
+          maxWidth: 400,
+          maxHeight: 400,
+          objectFit: "contain"
+        }}
       />
       <div style={{ padding: 12, maxWidth: 800 }}>
         <h3>{listingData.name}</h3>
         <p>{listingData.price / 1000000000000000000} ETH</p>
-        <a href={`https://ropsten.etherscan.io/address/${listingData.owner}`}>
-          View Seller Info
+
+        <a
+          href={`https://ropsten.etherscan.io/address/${listingData.owner}`}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <button>View Seller Info</button>
         </a>
         <p>{listingData.details}</p>
         <form
@@ -78,15 +88,14 @@ const ListingPage = () => {
             </a>
           </span>
 
-
           <div style={{ justifyContent: "flex-end", display: "flex" }}>
-          <input
-            id="buyerEmail"
-            type="email"
-            ref={email}
-            placeholder="Your email address..."
-            required
-          />
+            <input
+              id="buyerEmail"
+              type="email"
+              ref={email}
+              placeholder="Your email address..."
+              required
+            />
             <button
               style={{
                 color: "rbg(0, 0, 0)",
