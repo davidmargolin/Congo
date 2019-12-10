@@ -22,6 +22,7 @@ password = os.getenv('ATLASPASS')
 isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
+NETWORK_ID="3"
 
 allStatuses = {
     "0": "Listed",
@@ -48,7 +49,7 @@ app=Flask(__name__)
 CORS(app)
 
 if (isProd):
-    NETWORK_ID="3"
+    
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
     with open("./contract.json") as f:
         info_json = json.load(f)
@@ -184,6 +185,27 @@ def generateNewOrderEmail(some_order):
         print("[Email Service]: Problems opening email template file.")
         return
 
+    formattedSellerAddress = "%s...%s" %(some_order['sellerAddress'][:4],some_order['sellerAddress'][-4:])
+    formattedBuyerAddress = "%s...%s" %(some_order['buyerAddress'][:4],some_order['buyerAddress'][-4:])
+
+    etherScanAddress = "etherscan.io/address/" # assume main-net on init
+    if NETWORK_ID == "3":
+        etherScanAddress = "ropsten.etherscan.io/address/"
+    
+    etherScanBuyerLink = etherScanAddress + formattedBuyerAddress
+    etherScanSellerLink = etherScanAddress + formattedSellerAddress
+
+    #generate a tags
+    buyer_a_tag = email.new_tag('a')
+    seller_a_tag = email.new_tag('a')
+    buyer_a_tag['href'] = etherScanBuyerLink
+    seller_a_tag['href'] = etherScanSellerLink
+
+    #formatting wei to eth
+    ethTotal = float(some_order['total']) / 18
+    ethPrice = (float(some_order['total']) / float(some_order['quantity'])) / 18
+    
+
     email_summary = email.find("span",id="email-summary")
     congo_type = email.find("td",id="congo-type")
     buyer_email = email.find("td",id="buyer-email")
@@ -196,12 +218,12 @@ def generateNewOrderEmail(some_order):
     item_photo = email.find('img',id="item-photo")
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
-
+    
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
     item_photo['src'] = some_order['imageLink']
     price.append('Ξ')
-    price.append(str(float(some_order['total']) / float(some_order['quantity'])))
+    price.append(str(ethPrice))
     item_name.append(some_order['prodName'])
     quantity.append("Quantity ")
     quantity.append(str(some_order['quantity']))
@@ -209,12 +231,12 @@ def generateNewOrderEmail(some_order):
     timestamp.append(some_order['listingTimestamp'])
     seller_email.append(some_order['sellerContactDetails'])
     seller_email.append(email.new_tag('br'))
-    seller_email.append(some_order['sellerAddress'])
+    seller_email.append(seller_a_tag)
     buyer_email.append(some_order['buyerContactDetails'])
     buyer_email.append(email.new_tag('br'))
-    buyer_email.append(some_order['buyerAddress'])
+    buyer_email.append(buyer_a_tag)
     total.append('Ξ')
-    total.append(str(some_order['total']))
+    total.append(str(ethTotal))
     order_status.append(allStatuses[some_order['orderStatus']])
     
     return str(email)
