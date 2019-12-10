@@ -8,6 +8,7 @@ import ConfirmationPage from "./pages/CreateListingPage/confirmation";
 import Ethereum from "./context/EthereumContext";
 import "./assets/globalStyles.css";
 import UserOrders from "./pages/UserOrders";
+import Docs from "./pages/Docs";
 
 const App = () => {
   return (
@@ -32,6 +33,9 @@ const App = () => {
             </Route>
             <Route exact path="/confirmation-page">
               <ConfirmationPage />
+            </Route>
+            <Route path="/docs">
+              <Docs />
             </Route>
             <Route path="/">
               <SearchResults />

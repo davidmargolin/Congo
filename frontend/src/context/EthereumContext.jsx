@@ -67,11 +67,47 @@ const Ethereum = ({ children }) => {
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             display: "flex",
+            paddingLeft: 20,
+            paddingRight: 20,
             flexWrap: "wrap"
           }}
         >
+          <div
+            style={{
+              flexWrap: "wrap",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 12
+            }}
+          >
+            <Link to="/docs">
+              <span
+                style={{
+                  fontSize: 16,
+                  padding: 6
+                }}
+              >
+                Documentation
+              </span>
+            </Link>
+            <a
+              href={"https://ropsten.etherscan.io/address/" + CONTRACT_ADDRESS}
+              target="_blank"
+            >
+              <span
+                style={{
+                  fontSize: 16,
+                  padding: 6
+                }}
+              >
+                Etherscan
+              </span>
+            </a>
+            <span style={{ width: 300 }}></span>
+          </div>
           <div
             style={{
               flexWrap: "wrap-reverse",
