@@ -50,6 +50,7 @@ const ListingPage = () => {
         >
           <button>View Seller Info</button>
         </a>
+
         <p>{listingData.details}</p>
         <form
           style={{
@@ -58,7 +59,8 @@ const ListingPage = () => {
             flexDirection: "column",
             justifyContent: "space-evenly",
             maxWidth: 800,
-            minHeight: 200
+            marginTop: 30,
+            marginBottom: 30
           }}
           onSubmit={event => {
             event.preventDefault();
@@ -72,23 +74,7 @@ const ListingPage = () => {
               .then(response => console.log(response));
           }}
         >
-          <span>
-            It is recommended to use a burner email and not your personal email.
-            You can find one{" "}
-            <a
-              href="https://temp-mail.org/en/"
-              rel="noopener noreferrer"
-              target="_blank"
-              style={{
-                textDecoration: "underline",
-                color: "blue"
-              }}
-            >
-              here.
-            </a>
-          </span>
-
-          <div style={{ justifyContent: "flex-end", display: "flex" }}>
+          <div style={{ display: "flex" }}>
             <input
               id="buyerEmail"
               type="email"
@@ -109,6 +95,21 @@ const ListingPage = () => {
               Buy Now
             </button>
           </div>
+          <span style={{ fontSize: 12 }}>
+            *It is recommended to use a burner email and not your personal
+            email. You can find one{" "}
+            <a
+              href="https://temp-mail.org/en/"
+              rel="noopener noreferrer"
+              target="_blank"
+              style={{
+                textDecoration: "underline",
+                color: "blue"
+              }}
+            >
+              here.
+            </a>
+          </span>
         </form>
       </div>
     </div>
