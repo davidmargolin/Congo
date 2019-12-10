@@ -1,0 +1,123 @@
+~/Congo/contracts/contracts(contract-order-state-fix*) » truffle deploy --network ropsten                                                 karkay@Apollo
+
+Compiling your contracts...
+===========================
+> Compiling ./contracts/Congo.sol
+> Compiling ./contracts/Migrations.sol
+> Artifacts written to /Users/karkay/Congo/contracts/contracts/build/contracts
+> Compiled successfully using:
+   - solc: 0.5.8+commit.23d335f2.Emscripten.clang
+
+
+
+Migrations dry-run (simulation)
+===============================
+> Network name:    'ropsten-fork'
+> Network id:      3
+> Block gas limit: 0x7a1200
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > block number:        6943821
+   > block timestamp:     1575999729
+   > account:             0x3E82376daaF7d0DD43456b3871cF497322974b58
+   > balance:             0.999507214
+   > gas used:            246393
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000492786 ETH
+
+   -------------------------------------
+   > Total cost:         0.000492786 ETH
+
+
+2_Congo_v1.js
+=============
+
+   Deploying 'Congo'
+   -----------------
+   > block number:        6943823
+   > block timestamp:     1575999730
+   > account:             0x3E82376daaF7d0DD43456b3871cF497322974b58
+   > balance:             0.990717718
+   > gas used:            4367725
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00873545 ETH
+
+   -------------------------------------
+   > Total cost:          0.00873545 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.009228236 ETH
+
+
+
+
+
+Starting migrations...
+======================
+> Network name:    'ropsten'
+> Network id:      3
+> Block gas limit: 0x7a1200
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x90f960acd1e470e022689f60902efd769718a103ddc14253184d72564af5781c
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xf3819ba8B3eCbE1CC26871295d66C4bD49Cf5d6E
+   > block number:        6943821
+   > block timestamp:     1575999731
+   > account:             0x3E82376daaF7d0DD43456b3871cF497322974b58
+   > balance:             0.9955339
+   > gas used:            223305
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0044661 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0044661 ETH
+
+
+2_Congo_v1.js
+=============
+
+   Deploying 'Congo'
+   -----------------
+   > transaction hash:    0x9d59d87646fab7b9b586f5e6889b01523c33e115a615e40fc64a35dde5e7a96a
+   > Blocks: 1            Seconds: 28
+   > contract address:    0x18f12aCA521119abcdB43ca72A1e0820607a52f4
+   > block number:        6943824
+   > block timestamp:     1575999815
+   > account:             0x3E82376daaF7d0DD43456b3871cF497322974b58
+   > balance:             0.92295086
+   > gas used:            3586789
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.07173578 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.07173578 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.07620188 ETH
