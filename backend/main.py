@@ -24,21 +24,8 @@ sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
 NETWORK_ID="3"
 
-allStatuses = {
-    "0": "Listed",
-    "1": "Processing",
-    "2": "Shipped",
-    "3": "Complete",
-    "4": "Exception"
-}
-
-statusToEmoji = {
-    "0": "✏️",
-    "1": "💸",
-    "2" : "🚚💨",
-    "3": "📦",
-    "4": "⛔"
-}
+allStatuses = ["Listed","Processing","Shipped","Complete","Exception"]
+statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
@@ -98,9 +85,11 @@ def sendEmail(toEmail,sub,content):
 
 def putNewProduct(event):
     newProduct = dict(event['args'])
+    # print(newProduct)
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
+    print(newProduct)
     products.insert_one(newProduct)
 
 def updateListing(event):
