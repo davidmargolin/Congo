@@ -39,7 +39,10 @@ const ListingPage = () => {
           justifyContent: "flex-start"
         }}
       >
-        <img src={listingData.imageLink} style={{ width: 400, height: 400 }} />
+        <img
+          src={listingData.imageLink}
+          style={{ width: 400, height: 400, objectFit: "contain" }}
+        />
         <br />
         <div style={{ flex: 1, marginLeft: 40 }}>
           <h3>{listingData.name}</h3>

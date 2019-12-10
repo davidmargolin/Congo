@@ -83,24 +83,13 @@ def sendEmail(toEmail,sub,content):
         print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
         print(e)
 
-def convertEvent(event):
-    jsonStr = ""
-    for key in event.args:
-        keyVal = '"' + key + '"'+ ": " + '"' + str(event.args[key]) + '"' + ','
-        jsonStr += keyVal
-    jsonStr = jsonStr[:-1]
-    jsonStr = "{" + jsonStr + "}"
-    res = json.loads(jsonStr, strict=False)
-    print(res)
-    return res
-
 def print_event(event):
-    res = convertEvent(event)
+    res = dumpThenLoad(event)
     print(res)
     print(type(res))
 
 def putNewProduct(event):
-    newProduct = convertEvent(event)
+    newProduct = dumpThenLoad(event)
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
@@ -108,7 +97,7 @@ def putNewProduct(event):
 
 def updateListing(event):
     # find an listing
-    updatedListing = convertEvent(event)
+    updatedListing = dumpThenLoad(event)
     print("updating listing id: ",updatedListing['id'])
     products.update_one({'id': updatedListing['id']},{
         "$set": {
@@ -121,7 +110,7 @@ def updateListing(event):
         }
     })
 def putNewOrder(event):    
-    newOrder = convertEvent(event)
+    newOrder = dumpThenLoad(event)
     newOrder['listingTimestamp'] = datetime.datetime.utcnow()
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
@@ -138,7 +127,7 @@ def putNewOrder(event):
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
 
 def updateOrder(event):
-    updatedOrder = convertEvent(event)
+    updatedOrder = dumpThenLoad(event)
     print("updating order with id: ",updatedOrder['orderID'])
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
@@ -226,7 +215,8 @@ def eventMap(filters,poll_interval):
 
 def dumpThenLoad(item):
     dump = dumps(item)
-    return json.loads(dump, strict=False)
+    print(dump)
+    return json.loads(dump)
 
 # returns first listing with a matching id
 def queryListingById(id):
