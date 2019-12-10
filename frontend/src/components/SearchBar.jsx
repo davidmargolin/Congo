@@ -10,7 +10,7 @@ const SearchBar = ({ history }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: 10,
+        padding: 16,
         flexWrap: "wrap",
         flex: 1
       }}
@@ -20,7 +20,8 @@ const SearchBar = ({ history }) => {
       </Link>
       <div
         style={{
-          padding: 12,
+          paddingLeft: 20,
+          paddingRight: 20,
           justifyContent: "center",
           alignItems: "center",
           flex: 1,
@@ -31,7 +32,7 @@ const SearchBar = ({ history }) => {
         <input
           type="text"
           style={{
-            height: 20,
+            height: 18,
             flex: 1,
             fontSize: 16,
             padding: 12,
