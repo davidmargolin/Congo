@@ -22,9 +22,23 @@ password = os.getenv('ATLASPASS')
 isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
+NETWORK_ID="3"
 
-statusToEmoji = ["✏️", "💸", "🚚💨","📦", "⛔"]
+allStatuses = {
+    "0": "Listed",
+    "1": "Processing",
+    "2": "Shipped",
+    "3": "Complete",
+    "4": "Exception"
+}
 
+statusToEmoji = {
+    "0": "✏️",
+    "1": "💸",
+    "2" : "🚚💨",
+    "3": "📦",
+    "4": "⛔"
+}
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
@@ -34,7 +48,7 @@ app=Flask(__name__)
 CORS(app)
 
 if (isProd):
-    NETWORK_ID="3"
+    
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
     with open("./contract.json") as f:
         info_json = json.load(f)
@@ -106,20 +120,22 @@ def updateListing(event):
     })
 def putNewOrder(event):    
     newOrder = dict(event['args'])
-    newOrder['listingTimestamp'] = datetime.datetime.utcnow()
+    newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
 
     #fetch image link to attach to obj in order to generate email body
-    prodListing = products.find_one({"id": newOrder['orderID']})
+    prodListing = products.find_one({"id": newOrder['prodID']})
     if(prodListing is None):
         newOrder['imageLink'] = "" # default no pic
     else:
         newOrder['imageLink'] = prodListing['imageLink'] 
-
-    newOrder['congoType'] = ("%s You have a new order!"% statusToEmoji[int(newOrder['orderStatus'])])
-    content = generateNewOrderEmail(newOrder)
-    sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
+    newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
+    seller_content = generateNewOrderEmail(newOrder)
+    sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
+    newOrder['congoType'] = ("%s Your order is now processing!"% statusToEmoji[newOrder['orderStatus']])
+    buyer_content = generateNewOrderEmail(newOrder)
+    sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
 def updateOrder(event):
     updatedOrder = dict(event['args'])
@@ -131,16 +147,24 @@ def updateOrder(event):
         }
     })
 
-
     res = orders.find_one({"orderID": updatedOrder['orderID']})
     if res is None:
         print("[Update Order]: Order id %d was not found" %updatedOrder['orderID'])
         return
+
+    #fetch image from products to send out email.
+    prodListing = products.find_one({"id": res['prodID']})
+    if(prodListing is None):
+        res['imageLink'] = "" # default no pic
+    else:
+        res['imageLink'] = prodListing['imageLink']
+
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
     content = generateNewOrderEmail(res)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
+    sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],content)
 
 def generateNewOrderEmail(some_order):
     #Setup Email Template
@@ -154,6 +178,28 @@ def generateNewOrderEmail(some_order):
         print("[Email Service]: Problems opening email template file.")
         return
 
+    formattedSellerAddress = "%s...%s" %(some_order['sellerAddress'][:6],some_order['sellerAddress'][-4:])
+    formattedBuyerAddress = "%s...%s" %(some_order['buyerAddress'][:6],some_order['buyerAddress'][-4:])
+
+    etherScanAddress = "etherscan.io/address/" # assume main-net on init
+    if NETWORK_ID == "3":
+        etherScanAddress = "ropsten.etherscan.io/address/"
+    
+    etherScanBuyerLink = etherScanAddress + some_order['buyerAddress']
+    etherScanSellerLink = etherScanAddress + some_order['sellerAddress']
+
+    #generate a tags
+    buyer_a_tag = email.new_tag('a')
+    seller_a_tag = email.new_tag('a')
+    buyer_a_tag['href'] = etherScanBuyerLink
+    seller_a_tag['href'] = etherScanSellerLink
+    buyer_a_tag.append(formattedBuyerAddress)
+    seller_a_tag.append(formattedSellerAddress)
+
+    #formatting wei to eth
+    ethTotal = float(some_order['total']) / 10**18
+    ethPrice = (float(some_order['total']) / float(some_order['quantity'])) / 10**18
+
     email_summary = email.find("span",id="email-summary")
     congo_type = email.find("td",id="congo-type")
     buyer_email = email.find("td",id="buyer-email")
@@ -166,12 +212,12 @@ def generateNewOrderEmail(some_order):
     item_photo = email.find('img',id="item-photo")
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
-
-    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],some_order['orderStatus']))
+    
+    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
     item_photo['src'] = some_order['imageLink']
-    price.append('Ξ')
-    price.append(str(float(some_order['total']) / float(some_order['quantity'])))
+    price.append('Ξ ')
+    price.append(str(ethPrice))
     item_name.append(some_order['prodName'])
     quantity.append("Quantity ")
     quantity.append(str(some_order['quantity']))
@@ -179,14 +225,14 @@ def generateNewOrderEmail(some_order):
     timestamp.append(str(some_order['listingTimestamp']))
     seller_email.append(some_order['sellerContactDetails'])
     seller_email.append(email.new_tag('br'))
-    seller_email.append(some_order['sellerAddress'])
+    seller_email.append(seller_a_tag)
     buyer_email.append(some_order['buyerContactDetails'])
     buyer_email.append(email.new_tag('br'))
-    buyer_email.append(some_order['buyerAddress'])
-    total.append('Ξ')
-    total.append(str(some_order['total']))
-    order_status.append(some_order['orderStatus'])
-
+    buyer_email.append(buyer_a_tag)
+    total.append('Ξ ')
+    total.append(str(ethTotal))
+    order_status.append(allStatuses[some_order['orderStatus']])
+    
     return str(email)
 
 def eventMap(filters,poll_interval):
