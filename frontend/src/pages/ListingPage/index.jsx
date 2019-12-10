@@ -44,7 +44,7 @@ const ListingPage = () => {
           style={{ width: 400, height: 400, objectFit: "contain" }}
         />
         <br />
-        <div style={{ flex: 1, marginLeft: 40 }}>
+        <div style={{ flex: 1, padding: 24 }}>
           <h3>{listingData.name}</h3>
           <p>{listingData.price / 1000000000000000000} ETH</p>
           <a href={`https://ropsten.etherscan.io/address/${listingData.owner}`}>

@@ -18,7 +18,6 @@ const SearchBar = ({ history }) => {
       <Link to="/">
         <img src={logo} alt="Congo Logo" style={{ height: 90, margin: 6 }} />
       </Link>
-      <span style={{ width: 30 }} />
       <div
         style={{
           padding: 24,
@@ -37,7 +36,7 @@ const SearchBar = ({ history }) => {
             fontSize: 16,
             padding: 14,
             borderStyle: "solid",
-            borderColor: 'black',
+            borderColor: "black",
             borderWidth: 0,
             borderRadius: 20,
             boxShadow: "0px 0px 4px grey"
