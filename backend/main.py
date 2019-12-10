@@ -210,7 +210,6 @@ def eventMap(filters,poll_interval):
 
 def dumpThenLoad(item):
     dump = dumps(item)
-    print(dump)
     return json.loads(dump)
 
 # returns first listing with a matching id
