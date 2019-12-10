@@ -48,7 +48,6 @@ app=Flask(__name__)
 CORS(app)
 
 if (isProd):
-    
     w3=Web3(WebsocketProvider('wss://ropsten.infura.io/ws'))
     with open("./contract.json") as f:
         info_json = json.load(f)
@@ -267,17 +266,24 @@ def queryListingById(id):
 # returns all listings by name
 def queryListingsByName(name):
     regx = re.compile(name, re.I)
-    productResults = products.find({"name": regx}).limit(20)
+    productResults = products.find({"name": regx}).sort({"listingTimestamp" :-1}).limit(20)
     return list(map(dumpThenLoad, list(productResults)))
     
-# returns all listings by email
-def queryListingsByEmail(email):
-    productResults = products.find({"sellerContactDetails":email})
+# returns all listings by owner
+def queryListingsByOwner(owner):
+    productResults = products.find({"owner":owner})
     return list(map(dumpThenLoad, list(productResults)))
 
-# returns all orders by email
-def queryOrdersByEmail(email):
-    orderResults = orders.find({"buyerContactDetails":email})
+# returns all orders by buyer
+def queryListingsByBuyer(buyer):
+    orderResults = orders.find({"buyerAddress":buyer}, {"_id": 0, "prodID": 1})
+    ids = list( dict.fromkeys(map(lambda order: order["prodID"], list(orderResults))) )
+    productResults = products.find({"id":{"$in": ids}})
+    return list(map(dumpThenLoad, list(productResults)))
+
+# returns all orders by buyer
+def queryOrdersByBuyer(buyer):
+    orderResults = orders.find({"buyerAddress":buyer})
     return list(map(dumpThenLoad, list(orderResults)))
 
 def startWorkers():
@@ -297,10 +303,12 @@ def hello_world():
 # get listing by id
 @app.route('/listing/<listingId>')
 def getListing(listingId):
+    address = request.args.get('address')
     if listingId is not None:
-        return jsonify(
-            queryListingById(listingId)
-        )
+        return jsonify({
+            "listing": queryListingById(listingId),
+            "orders": [] if address is None else queryOrdersByBuyer(address)
+        })
     else:
         return abort(400)
 
@@ -315,24 +323,24 @@ def search():
     else:
         return abort(400)
 
-# get orders by email address
+# get orders by buyer
 @app.route('/user/orders')
 def userOrders():
-    email = request.args.get('email') 
-    if email is not None:
+    buyer = request.args.get('buyer') 
+    if buyer is not None:
         return jsonify(
-            {"orders": queryOrdersByEmail(email)}
+            {"listings": queryListingsByBuyer(buyer)}
         )
     else:
         return abort(400)
 
-# get listings by email address
+# get listings by owner
 @app.route('/user/listings')
 def userListings():
-    email = request.args.get('email') 
-    if email is not None:
+    owner = request.args.get('owner') 
+    if owner is not None:
         return jsonify(
-            {"listings": queryListingsByEmail(email)}
+            {"listings": queryListingsByOwner(owner)}
         )
     else:
         return abort(400)

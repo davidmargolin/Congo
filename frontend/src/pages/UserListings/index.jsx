@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Listing from "../../components/Listing";
-import { useParams } from "react-router-dom";
+import { EthereumContext } from "../../context/EthereumContext";
 
-const getSearchResults = query =>
+const getListingsByOwner = owner =>
   fetch(
-    `https://congo-mart.herokuapp.com/search?query=${encodeURIComponent(query)}`
+    `https://congo-mart.herokuapp.com/user/listings?owner=${encodeURIComponent(owner)}`
   ).then(res => res.json());
 
-const SearchResultPage = () => {
-  const { query } = useParams();
+const UserListings = () => {
   const [listings, setListings] = useState([]);
+  const { chosenAccount } = useContext(EthereumContext);
+
   useEffect(() => {
-    getSearchResults(query || "").then(({ results }) => {
+    getListingsByOwner(chosenAccount).then(({ listings: results }) => {
       setListings(results);
     });
-  }, [query]);
+  }, [chosenAccount]);
   return (
     <span
       style={{
@@ -24,7 +25,7 @@ const SearchResultPage = () => {
         flexDirection: "column"
       }}
     >
-      {query && query.trim() !== "" && <p>Results for "{query}":</p>}
+      <p>Your Listings:</p>
 
       <div
         style={{
@@ -49,4 +50,4 @@ const SearchResultPage = () => {
   );
 };
 
-export default SearchResultPage;
+export default UserListings;
