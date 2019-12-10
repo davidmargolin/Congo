@@ -189,7 +189,7 @@ const SellerOrders = ({ orders }) => {
   );
 };
 
-const Purchase = ({ listingID, price, sellerAddress }) => {
+const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
   const { chosenAccount, methods } = useContext(EthereumContext);
   const email = useRef();
   const makePurchase = () => {
@@ -198,7 +198,10 @@ const Purchase = ({ listingID, price, sellerAddress }) => {
       value: price
     });
   };
-  if (sellerAddress !== chosenAccount)
+  if (sellerAddress === chosenAccount)
+    return "Purchasing is disabled on owned listings.";
+  else if (quantity > 0) return "None in stock.";
+  else
     return (
       <form
         style={{
@@ -243,7 +246,6 @@ const Purchase = ({ listingID, price, sellerAddress }) => {
         </span>
       </form>
     );
-  else return "Purchasing is disabled on owned listings.";
 };
 
 const ListingPage = () => {
@@ -320,6 +322,7 @@ const ListingPage = () => {
             listingID={listingID}
             price={listingData.price}
             sellerAddress={listingData.owner}
+            quantity={listingData.quantity}
           />
         </div>
       </div>
