@@ -18,6 +18,7 @@ div {
 
 html * {
   font-family: "Roboto", sans-serif !important;
+  -webkit-appearance: none !important;
 }
 
 body {
@@ -75,3 +76,22 @@ td {
   border: none;
 }
 
+input {
+  height: 16px;
+  padding: 12px;
+  margin: 4px;
+  border-style: solid;
+  border-color: black;
+  border-width: 0px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 2px grey;
+}
+
+textarea {
+  padding: 12px;
+  border-style: solid;
+  border-color: black;
+  border-width: 0px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 2px grey;
+}

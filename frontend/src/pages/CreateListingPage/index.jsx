@@ -111,7 +111,7 @@ const CreateListingPage = () => {
           }}
         >
           <input
-            style={{ display: "flex", flex: 1, marginRight: 8 }}
+            style={{ display: "flex", flex: 1 }}
             id="productPrice"
             min={0}
             type="text"
@@ -120,7 +120,12 @@ const CreateListingPage = () => {
             required
           />
           <input
-            style={{ display: "flex", flex: 1, marginRight: 8 }}
+            style={{
+              display: "flex",
+              flex: 1,
+              marginTop: 12,
+              marginBottom: 12
+            }}
             id="productQuantity"
             type="number"
             min={0}
@@ -134,7 +139,6 @@ const CreateListingPage = () => {
           id="productDescription"
           type="text"
           rows="5"
-          style={{ padding: 8 }}
           ref={details}
           placeholder="Product description..."
           required
