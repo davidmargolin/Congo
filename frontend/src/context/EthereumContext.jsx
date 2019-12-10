@@ -69,16 +69,16 @@ const Ethereum = ({ children }) => {
             alignItems: "center",
             justifyContent: "flex-end",
             display: "flex",
-            flexWrap: "wrap-reverse",
-            padding: 12
+            flexWrap: "wrap"
           }}
         >
           <div
             style={{
-              flexWrap: "wrap",
+              flexWrap: "wrap-reverse",
               display: "flex",
               justifyContent: "center",
-              alignItems: "center"
+              alignItems: "center",
+              padding: 12
             }}
           >
             <Link to="/createListing">
@@ -111,21 +111,17 @@ const Ethereum = ({ children }) => {
                 Your Listings
               </span>
             </Link>
+            <select
+              style={{ minWidth: 250, maxWidth: 300 }}
+              onChange={event => setChosenAccount(event.target.value)}
+            >
+              {accounts.map(account => (
+                <option value={account}>
+                  {account.slice(0, 6) + "..." + account.slice(-6)}
+                </option>
+              ))}
+            </select>
           </div>
-          <select
-            style={{
-              display: "flex",
-              flex: 1,
-              maxWidth: 400,
-              minWidth: 100,
-              margin: 8
-            }}
-            onChange={event => setChosenAccount(event.target.value)}
-          >
-            {accounts.map(account => (
-              <option value={account}>{account}</option>
-            ))}
-          </select>
         </div>
         <SearchBar />
 

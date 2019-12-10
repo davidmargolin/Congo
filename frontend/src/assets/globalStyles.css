@@ -28,7 +28,6 @@ button {
   display: inline-block;
   padding: 8px;
   margin: 2px;
-  margin: 0;
   text-decoration: none;
   background: #00ab74;
   outline: none !important;
@@ -57,7 +56,6 @@ button:active {
 select {
   padding: 4px;
   margin: 2px;
-  margin: 0;
   text-decoration: none;
   background: white;
   outline: none !important;
