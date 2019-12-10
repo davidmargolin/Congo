@@ -264,7 +264,7 @@ def queryListingById(id):
 # returns all listings by name
 def queryListingsByName(name):
     regx = re.compile(name, re.I)
-    productResults = products.find({"name": regx}).limit(20)
+    productResults = products.find({"name": regx, "quantity": {"$gt": 0}}).limit(20)
     return list(map(dumpThenLoad, list(productResults)))
     
 # returns all listings by owner
