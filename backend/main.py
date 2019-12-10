@@ -90,7 +90,7 @@ def convertEvent(event):
         jsonStr += keyVal
     jsonStr = jsonStr[:-1]
     jsonStr = "{" + jsonStr + "}"
-    res = json.loads(jsonStr)
+    res = json.loads(jsonStr, strict=False)
     print(res)
     return res
 
@@ -226,7 +226,7 @@ def eventMap(filters,poll_interval):
 
 def dumpThenLoad(item):
     dump = dumps(item)
-    return json.loads(dump)
+    return json.loads(dump, strict=False)
 
 # returns first listing with a matching id
 def queryListingById(id):
