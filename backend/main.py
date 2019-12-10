@@ -83,11 +83,6 @@ def sendEmail(toEmail,sub,content):
         print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
         print(e)
 
-def print_event(event):
-    res = dumpThenLoad(event['args'])
-    print(res)
-    print(type(res))
-
 def putNewProduct(event):
     newProduct = dumpThenLoad(event['args'])
     print("creating new listing with id: ",newProduct['id'])
@@ -220,7 +215,7 @@ def dumpThenLoad(item):
 
 # returns first listing with a matching id
 def queryListingById(id):
-    listing = products.find_one({"id": id})
+    listing = products.find_one({"id": int(id)})
     return dumpThenLoad(listing)
     
 
