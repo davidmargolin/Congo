@@ -4,16 +4,21 @@
 
 
 ### Congo Market API Documentation
-<p>
-This solidity contract enables two parties to make deals based on listings. These deals are called orders and the ethereum is being used to perform these transactions.
-<br>In order to create an order, a buyer, which must differ from the seller, has to agree with the seller's listing. Upon agreement, the buyer can make a call to the contract along with funds to pay for the item in the listing. The contract will handle the transfer of funds. Once an order has been established, the seller can update the order status periodically. 
 
-**Notes**:<br>
-**To Buyers**<br>
-Please complete your due diligence thoroughly prior to sending funds as the seller has no definite way of establishing reputation other than their transaction history.<br>
-**To Sellers**<br>
+This solidity contract enables two parties to make deals based on listings. These deals are called orders and the ethereum is being used to perform these transactions.
+
+In order to create an order, a buyer, which must differ from the seller, has to agree with the seller's listing. Upon agreement, the buyer can make a call to the contract along with funds to pay for the item in the listing. The contract will handle the transfer of funds. Once an order has been established, the seller can update the order status periodically. 
+
+**Notes**:
+
+**To Buyers**
+
+Please complete your due diligence thoroughly prior to sending funds as the seller has no definite way of establishing reputation other than their transaction history.
+
+**To Sellers**
+
 Please note that there is no mechanism in this contract for performing refunds and your listing quantities will be appropriately updated as orders are created.
-<p>
+
 
 ### Table of Contents
 1. [Order Contract Calls](#orders)
@@ -24,23 +29,27 @@ Please note that there is no mechanism in this contract for performing refunds a
 
 ## Orders
 **Creating an Order**
-<br>This function allows buyers to purchase from all the available listings and once the proper payment is received in full, the listing's quantity is updated `listingUpdated` and `orderCreated` events are emitted.
+
+This function allows buyers to purchase from all the available listings and once the proper payment is received in full, the listing's quantity is updated `listingUpdated` and `orderCreated` events are emitted.
 
 
 **Requirements**:
-<br>**callerAddress != sellerAddress**
+
+**callerAddress != sellerAddress**
 
 `function createOrder()`:
 1. `uint _id` - the listing id to be purchased
 2. `uint _quantity` - the desired quantity to be purchased 
 3.  `string memory _notes` - any extra notes you would like to supply to the seller.
-4.  `string memory _ buyerContactDetails` - buyer's contact information (e.g burner12@email.com)<br>
+4.  `string memory _ buyerContactDetails` - buyer's contact information (e.g burner12@email.com)
 
 **Updating an Order**
-<br>This function allows sellers to update their order status which is represented in `State`. Once completed an `orderUpdated` event is emitted indicating the new order status/state.
+
+This function allows sellers to update their order status which is represented in `State`. Once completed an `orderUpdated` event is emitted indicating the new order status/state.
 
 **Requirements**:
-<br>**callerAddress == sellerAddress**
+
+**callerAddress == sellerAddress**
 
 `function updateOrder()`:
 1. `uint _id` - the listing id to be purchased
@@ -49,7 +58,8 @@ Please note that there is no mechanism in this contract for performing refunds a
 
 ## Listings
 **Creating a Listing**
-<br>This function allows sellers to create a listing for an item. The only fee is from gas. Once the listing is successfully saved, the function emits a `listingCreated` event with all the details of the listing.
+
+This function allows sellers to create a listing for an item. The only fee is from gas. Once the listing is successfully saved, the function emits a `listingCreated` event with all the details of the listing.
 
 `function createListing()`:
 1. `uint _quantity` - the quantity available for sale
@@ -60,10 +70,12 @@ Please note that there is no mechanism in this contract for performing refunds a
 6.  `string memory _sellerContactDetails` - the seller's contact information
 
 **Updating a Listing**
-<br>This function allows sellers to modify a listing once it has been created. Only listing publishers a.k.a the seller of any particular listing can update the details. Once a listing is successfully updated, a `listingUpdated` event is emitted with all the new listing details.
+
+This function allows sellers to modify a listing once it has been created. Only listing publishers a.k.a the seller of any particular listing can update the details. Once a listing is successfully updated, a `listingUpdated` event is emitted with all the new listing details.
 
 **Requirements**:
-<br>**callerAddress == sellerAddress**
+
+**callerAddress == sellerAddress**
 
 `function updateListing()`:
 1. `uint _id` - the valid listing ID to be updated
@@ -87,6 +99,7 @@ Please note that there is no mechanism in this contract for performing refunds a
 6. `string name`
 7. `address payable owner`
 8. `string sellerContactDetails`
+
 ---
 
 `event ListingUpdated`:
@@ -98,11 +111,13 @@ Please note that there is no mechanism in this contract for performing refunds a
 6. `string name`
 7. `address payable owner` - listing publisher
 8. `string sellerContactDetails`
----
+
+
 ### Order Events
 `event orderUpdated`:
 1. `uint orderID`
 2. `uint orderStatus` - an unsigned int mapping to a value in `State` enum.
+
 ---
 
 `event orderCreated`:
@@ -121,11 +136,15 @@ Please note that there is no mechanism in this contract for performing refunds a
 ## Extra Information
 
 `enum State`:
-<br>
-`0 -> Listed`<br>
-`1 -> Processing`<br>
-`2 -> Shipped`<br>
-`3 -> Complete`<br>
+
+`0 -> Listed`
+
+`1 -> Processing`
+
+`2 -> Shipped`
+
+`3 -> Complete`
+
 `4 -> Exception`
 
 
