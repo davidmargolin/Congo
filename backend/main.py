@@ -286,6 +286,11 @@ def queryOrdersByBuyer(prodID, buyer):
     orderResults = orders.find({"buyerAddress":buyer, "prodID": int(prodID)})
     return list(map(dumpThenLoad, list(orderResults)))
 
+# returns all orders by buyer
+def queryOrdersBySeller(prodID, seller):
+    orderResults = orders.find({"sellerAddress":seller, "prodID": int(prodID)})
+    return list(map(dumpThenLoad, list(orderResults)))
+
 def startWorkers():
     filters = {
         "productListed" :contract.events.listingCreated.createFilter(fromBlock='latest'),
@@ -307,7 +312,8 @@ def getListing(listingId):
     if listingId is not None:
         return jsonify({
             "listing": queryListingById(listingId),
-            "orders": [] if address is None else queryOrdersByBuyer(listingId, address)
+            "ordersBought": [] if address is None else queryOrdersByBuyer(listingId, address),
+            "ordersSold": [] if address is None else queryOrdersBySeller(listingId, address)
         })
     else:
         return abort(400)
