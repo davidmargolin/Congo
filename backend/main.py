@@ -122,10 +122,10 @@ def putNewOrder(event):
     else:
         newOrder['imageLink'] = prodListing['imageLink'] 
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
-    seller_content = generateNewOrderEmail(newOrder)
+    seller_content = generateNewOrderEmail(newOrder,False)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
     newOrder['congoType'] = ("%s Your order is now processing!"% statusToEmoji[newOrder['orderStatus']])
-    buyer_content = generateNewOrderEmail(newOrder)
+    buyer_content = generateNewOrderEmail(newOrder,True)
     sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
 def updateOrder(event):
@@ -153,11 +153,12 @@ def updateOrder(event):
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
-    content = generateNewOrderEmail(res)
+    content = generateNewOrderEmail(res,True)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
+    content = generateNewOrderEmail(res,False)
     sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],content)
 
-def generateNewOrderEmail(some_order):
+def generateNewOrderEmail(some_order,isBuyer):
     #Setup Email Template
     #load the file
     email = None
@@ -209,6 +210,10 @@ def generateNewOrderEmail(some_order):
     order_num['href'] = ORDERS_URL
     #add link to view listings
     edit_button['href'] = LISTINGS_URL + str(some_order['prodID'])
+    if isBuyer:
+        edit_button.append("VIEW ORDER")
+    else:
+        edit_button.append("EDIT ORDER")
     
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
