@@ -10,3 +10,6 @@ a:hover {
 textarea {
   resize: none;
 }
+div {
+  white-space: pre-wrap;
+} 

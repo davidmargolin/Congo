@@ -40,7 +40,6 @@ statusToEmoji = {
     "4": "⛔"
 }
 
-
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
@@ -98,24 +97,8 @@ def sendEmail(toEmail,sub,content):
         print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
         print(e)
 
-def convertEvent(event):
-    jsonStr = ""
-    for key in event.args:
-        keyVal = '"' + key + '"'+ ": " + '"' + str(event.args[key]) + '"' + ','
-        jsonStr += keyVal
-    jsonStr = jsonStr[:-1]
-    jsonStr = "{" + jsonStr + "}"
-    res = json.loads(jsonStr)
-    print(res)
-    return res
-
-def print_event(event):
-    res = convertEvent(event)
-    print(res)
-    print(type(res))
-
 def putNewProduct(event):
-    newProduct = convertEvent(event)
+    newProduct = event['args']
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
@@ -123,7 +106,7 @@ def putNewProduct(event):
 
 def updateListing(event):
     # find an listing
-    updatedListing = convertEvent(event)
+    updatedListing = event['args']
     print("updating listing id: ",updatedListing['id'])
     products.update_one({'id': updatedListing['id']},{
         "$set": {
@@ -136,7 +119,7 @@ def updateListing(event):
         }
     })
 def putNewOrder(event):    
-    newOrder = convertEvent(event)
+    newOrder = event['args']
     newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
@@ -147,7 +130,6 @@ def putNewOrder(event):
         newOrder['imageLink'] = "" # default no pic
     else:
         newOrder['imageLink'] = prodListing['imageLink'] 
-
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
     seller_content = generateNewOrderEmail(newOrder)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
@@ -156,7 +138,7 @@ def putNewOrder(event):
     sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
 def updateOrder(event):
-    updatedOrder = convertEvent(event)
+    updatedOrder = event['args']
     print("updating order with id: ",updatedOrder['orderID'])
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
@@ -179,7 +161,7 @@ def updateOrder(event):
 
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
-    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[res['orderStatus']])
+    res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
     content = generateNewOrderEmail(res)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
     sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],content)
@@ -240,7 +222,7 @@ def generateNewOrderEmail(some_order):
     quantity.append("Quantity ")
     quantity.append(str(some_order['quantity']))
     order_num.append(str(some_order['orderID']))
-    timestamp.append(some_order['listingTimestamp'])
+    timestamp.append(str(some_order['listingTimestamp']))
     seller_email.append(some_order['sellerContactDetails'])
     seller_email.append(email.new_tag('br'))
     seller_email.append(seller_a_tag)
@@ -278,7 +260,7 @@ def dumpThenLoad(item):
 
 # returns first listing with a matching id
 def queryListingById(id):
-    listing = products.find_one({"id": id})
+    listing = products.find_one({"id": int(id)})
     return dumpThenLoad(listing)
     
 
