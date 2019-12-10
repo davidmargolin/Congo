@@ -200,7 +200,7 @@ const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
   };
   if (sellerAddress === chosenAccount)
     return "Purchasing is disabled on owned listings.";
-  else if (quantity > 0) return "None in stock.";
+  else if (quantity === 0) return "None in stock.";
   else
     return (
       <form
