@@ -23,22 +23,12 @@ isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
 NETWORK_ID="3"
+BASE_URL = "https://congo-frontend.herokuapp.com"
+ORDERS_URL = BASE_URL + "/user/orders"
+LISTINGS_URL = BASE_URL + "/listing/"
 
-allStatuses = {
-    "0": "Listed",
-    "1": "Processing",
-    "2": "Shipped",
-    "3": "Complete",
-    "4": "Exception"
-}
-
-statusToEmoji = {
-    "0": "✏️",
-    "1": "💸",
-    "2" : "🚚💨",
-    "3": "📦",
-    "4": "⛔"
-}
+allStatuses = ["Listed","Processing","Shipped","Complete","Exception"]
+statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
@@ -98,9 +88,11 @@ def sendEmail(toEmail,sub,content):
 
 def putNewProduct(event):
     newProduct = dict(event['args'])
+    # print(newProduct)
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
+    print(newProduct)
     products.insert_one(newProduct)
 
 def updateListing(event):
@@ -211,6 +203,12 @@ def generateNewOrderEmail(some_order):
     item_photo = email.find('img',id="item-photo")
     total = email.find("td",id="total")
     order_status = email.find("td",id="order-status")
+    edit_button = email.find("a",id="edit-button")
+
+    #added link to view orders page
+    order_num['href'] = ORDERS_URL
+    #add link to view listings
+    edit_button['href'] = LISTINGS_URL + str(some_order['prodID'])
     
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
