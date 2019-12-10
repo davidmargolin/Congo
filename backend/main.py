@@ -84,12 +84,12 @@ def sendEmail(toEmail,sub,content):
         print(e)
 
 def print_event(event):
-    res = dumpThenLoad(event)
+    res = dumpThenLoad(event['args'])
     print(res)
     print(type(res))
 
 def putNewProduct(event):
-    newProduct = dumpThenLoad(event)
+    newProduct = dumpThenLoad(event['args'])
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
@@ -97,7 +97,7 @@ def putNewProduct(event):
 
 def updateListing(event):
     # find an listing
-    updatedListing = dumpThenLoad(event)
+    updatedListing = dumpThenLoad(event['args'])
     print("updating listing id: ",updatedListing['id'])
     products.update_one({'id': updatedListing['id']},{
         "$set": {
@@ -110,7 +110,7 @@ def updateListing(event):
         }
     })
 def putNewOrder(event):    
-    newOrder = dumpThenLoad(event)
+    newOrder = dumpThenLoad(event['args'])
     newOrder['listingTimestamp'] = datetime.datetime.utcnow()
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
@@ -127,7 +127,7 @@ def putNewOrder(event):
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],content)
 
 def updateOrder(event):
-    updatedOrder = dumpThenLoad(event)
+    updatedOrder = dumpThenLoad(event['args'])
     print("updating order with id: ",updatedOrder['orderID'])
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
