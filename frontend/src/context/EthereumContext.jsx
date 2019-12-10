@@ -81,7 +81,7 @@ const Ethereum = ({ children }) => {
               padding: 12
             }}
           >
-            <Link to="/createListing">
+            <Link to="/create-listing">
               <span
                 style={{
                   fontSize: 16,
@@ -91,7 +91,7 @@ const Ethereum = ({ children }) => {
                 New Listing
               </span>
             </Link>
-            <Link to="/orders">
+            <Link to="/user/orders">
               <span
                 style={{
                   fontSize: 16,
@@ -101,7 +101,7 @@ const Ethereum = ({ children }) => {
                 Your Orders
               </span>
             </Link>
-            <Link to="/listings">
+            <Link to="/user/listings">
               <span
                 style={{
                   fontSize: 16,
@@ -116,7 +116,7 @@ const Ethereum = ({ children }) => {
               onChange={event => setChosenAccount(event.target.value)}
             >
               {accounts.map(account => (
-                <option value={account}>
+                <option value={account} key={account}>
                   {account.slice(0, 6) + "..." + account.slice(-6)}
                 </option>
               ))}

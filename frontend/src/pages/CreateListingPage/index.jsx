@@ -41,7 +41,7 @@ const CreateListingPage = () => {
   const accountInfo = useContext(EthereumContext);
   const [confirmation, setConfirmation] = useState(false);
 
-  if (confirmation) return <Redirect to="confirmationPage"></Redirect>;
+  if (confirmation) return <Redirect to="confirmation-page"></Redirect>;
 
   return (
     <div

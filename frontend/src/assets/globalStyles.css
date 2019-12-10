@@ -27,7 +27,6 @@ body {
 button {
   display: inline-block;
   padding: 8px;
-  margin: 2px;
   text-decoration: none;
   background: #00ab74;
   outline: none !important;
@@ -67,3 +66,12 @@ select {
   text-align: center;
   transition: background 250ms ease-in-out, transform 150ms ease;
 }
+
+th,
+td {
+  border-collapse: collapse;
+  text-align: start;
+  padding: 8px;
+  border: none;
+}
+
