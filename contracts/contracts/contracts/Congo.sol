@@ -258,12 +258,13 @@ contract Congo {
 	public payable{
 		//validate user's input
 		require(_id <= orderCount && _id > 0, "order id is invalid.");
-		require(uint(State.Exception) >= nextState,"invalid input state. >");
-		//state should only move forwards
+		require(uint(State.Exception) >= nextState,"invalid input state.");
 		//get the order.
 		Order memory _order = orders[_id];
 		//check if caller has permission to edit
 		require(msg.sender == _order.sellerAddress,"Only the seller can modify the order status.");
+		//state should only move forwards
+		require(uint(_order.orderStatus) < nextState, "Order states can only move forwards.");
 		_order.orderStatus = State(nextState);
 		//update order struct in mapping
 		orders[_id] = _order;
