@@ -98,7 +98,7 @@ def sendEmail(toEmail,sub,content):
         print(e)
 
 def putNewProduct(event):
-    newProduct = event['args']
+    newProduct = dict(event['args'])
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
@@ -106,7 +106,7 @@ def putNewProduct(event):
 
 def updateListing(event):
     # find an listing
-    updatedListing = event['args']
+    updatedListing = dict(event['args'])
     print("updating listing id: ",updatedListing['id'])
     products.update_one({'id': updatedListing['id']},{
         "$set": {
@@ -119,7 +119,7 @@ def updateListing(event):
         }
     })
 def putNewOrder(event):    
-    newOrder = event['args']
+    newOrder = dict(event['args'])
     newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
@@ -138,7 +138,7 @@ def putNewOrder(event):
     sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
 def updateOrder(event):
-    updatedOrder = event['args']
+    updatedOrder = dict(event['args'])
     print("updating order with id: ",updatedOrder['orderID'])
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {

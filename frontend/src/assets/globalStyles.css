@@ -10,6 +10,17 @@ a:hover {
 textarea {
   resize: none;
 }
+
 div {
   white-space: pre-wrap;
 } 
+
+html *
+{
+  font-family: 'Roboto', sans-serif !important;
+}
+
+body 
+{
+  margin: 0;
+}
