@@ -25,7 +25,7 @@ congoEmail = "Congo-Exchange@no-reply.io"
 NETWORK_ID="3"
 BASE_URL = "https://congo-frontend.herokuapp.com"
 ORDERS_URL = BASE_URL + "/user/orders"
-LISTINGS_URL = BASE_URL + "/user/listing/"
+LISTINGS_URL = BASE_URL + "/listing/"
 
 allStatuses = ["Listed","Processing","Shipped","Complete","Exception"]
 statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
