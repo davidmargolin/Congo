@@ -2,13 +2,13 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { EthereumContext } from "../../context/EthereumContext.jsx";
 
-const STATUSES = {
-  "0": "Listed",
-  "1": "Processing",
-  "2": "Shipped",
-  "3": "Complete",
-  "4": "Exception"
-};
+const STATUSES = [
+  "Created",
+  "Processing",
+  "Shipped",
+  "Complete",
+  "Exception"
+]
 
 const getListing = (id, address) =>
   fetch(

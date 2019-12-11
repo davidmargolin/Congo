@@ -1,5 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
-import { Redirect } from "react-router-dom";
+import React, { useRef, useContext } from "react";
 import Web3 from "web3";
 import { EthereumContext } from "../../context/EthereumContext";
 
@@ -14,7 +13,6 @@ const makeListing = (
   details,
   imageURL,
   sellerEmail,
-  setConfirmation,
   accountInfo
 ) => {
   const { chosenAccount, methods } = accountInfo;
@@ -22,10 +20,6 @@ const makeListing = (
   methods
     .createListing(quantity, price, details, name, imageURL, sellerEmail)
     .send({ from: chosenAccount })
-    .then(response => {
-      console.log(response);
-      setConfirmation(true);
-    })
     .catch(error => {
       console.log(error);
     });
@@ -39,9 +33,6 @@ const CreateListingPage = () => {
   const details = useRef();
   const email = useRef();
   const accountInfo = useContext(EthereumContext);
-  const [confirmation, setConfirmation] = useState(false);
-
-  if (confirmation) return <Redirect to="confirmation-page"></Redirect>;
 
   return (
     <div
@@ -77,7 +68,6 @@ const CreateListingPage = () => {
             details.current.value,
             image.current.value,
             email.current.value,
-            setConfirmation,
             accountInfo
           );
         }}
