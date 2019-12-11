@@ -15,6 +15,9 @@ from sendgrid.helpers.mail import Mail
 import bs4
 import re
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 load_dotenv()
 
 username = os.getenv('ATLASUSER')
@@ -34,6 +37,13 @@ statusToEmoji = ["💸","🏭","🚚💨","📦", "⛔"]
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
+
+if (isProd):
+    sentry_sdk.init(
+        dsn=os.getenv('SENTRYDSN'),
+        integrations=[FlaskIntegration()]
+    )
+
 
 app=Flask(__name__)
 CORS(app)
@@ -118,15 +128,12 @@ def putNewOrder(event):
 
     #fetch image link to attach to obj in order to generate email body
     prodListing = products.find_one({"id": newOrder['prodID']})
-    newOrder['imageLink'] = prodListing['imageLink'] if prodListing is None else ""
-
-    #sending email to buyer and seller for new order
+    newOrder['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
     del newOrder['_id']
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
     seller_content = generateNewOrderEmail(newOrder,False)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
-
-    newOrder['congoType'] = ("%s Your order has updated!"% statusToEmoji[newOrder['orderStatus']])
+    newOrder['congoType'] = ("%s Your order was successfully created!"% statusToEmoji[newOrder['orderStatus']])
     buyer_content = generateNewOrderEmail(newOrder,True)
     sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
@@ -146,15 +153,14 @@ def updateOrder(event):
         return
     #fetch image from products to send out email.
     prodListing = products.find_one({"id": res['prodID']})
-    updatedOrder['imageLink'] = prodListing['imageLink'] if prodListing is None else ""
-    #send out emails
+    res['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
     orderLoaded = dumpThenLoad(res)
     del res['_id']
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
-    content = generateNewOrderEmail(res,True)
-    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
-    content = generateNewOrderEmail(res,False)
-    sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],content)
+    buyer_content = generateNewOrderEmail(res,True)
+    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],buyer_content)
+    seller_content = generateNewOrderEmail(res,False)
+    sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],seller_content)
 
 
 def generateNewOrderEmail(order,isBuyer):
@@ -162,7 +168,6 @@ def generateNewOrderEmail(order,isBuyer):
     #Shortening Eth Addresses
     formattedSellerAddress = "%s...%s" %(some_order['sellerAddress'][:6],some_order['sellerAddress'][-4:])
     formattedBuyerAddress = "%s...%s" %(some_order['buyerAddress'][:6],some_order['buyerAddress'][-4:])
-    #generate link to buyer & seller
     etherScanAddress = "ropsten.etherscan.io/address/" if NETWORK_ID == "3" else "etherscan.io/address/"
     etherScanBuyerLink = etherScanAddress + some_order['buyerAddress']
     etherScanSellerLink = etherScanAddress + some_order['sellerAddress']
