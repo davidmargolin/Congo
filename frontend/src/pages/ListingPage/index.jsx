@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { EthereumContext } from "../../context/EthereumContext.jsx";
 
 const STATUSES = [
-  "Created",
+  "Paid",
   "Processing",
   "Shipped",
   "Complete",

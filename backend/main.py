@@ -29,9 +29,10 @@ NETWORK_ID="3"
 BASE_URL = "https://congo-frontend.herokuapp.com"
 ORDERS_URL = BASE_URL + "/user/orders"
 LISTINGS_URL = BASE_URL + "/listing/"
+SENDGRID_TRANSACTIONAL_TEMPLATE_ID = "d-3119602fe60149fa846693a319301110"
 
-allStatuses = ["Created","Processing","Shipped","Complete","Exception"]
-statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
+allStatuses = ["Paid","Processing","Shipped","Complete","Exception"]
+statusToEmoji = ["💸","🏭","🚚💨","📦", "⛔"]
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
@@ -67,23 +68,22 @@ def getContract():
     contract = None
     try:
         contract=w3.eth.contract(address=CONTRACT_ADDRESS,abi=congo_abi)
-    except requests.exceptions.ConnectionError(e, request=request):
-        print("exception raised",e)
+    except requests.exceptions.ConnectionError(request=request):
         print("sleeping for a bit..")
         time.sleep(10)
         return getContract()
     return contract
 
-contract = getContract()
-
 #Email Confirmation Service
 def sendEmail(toEmail,sub,content):
     message = Mail(
         from_email=congoEmail,
-        to_emails=toEmail,
-        subject=sub,
-        html_content=content
+        to_emails=toEmail,  
     )
+    message.dynamic_template_data = {
+        'order': content
+    }
+    message.template_id = SENDGRID_TRANSACTIONAL_TEMPLATE_ID
     print("[SendGrid Attempt]: From: %s To: %s Subject: %s" %(congoEmail,toEmail,sub))
     try:
         sg = SendGridAPIClient(sendGridKey)
@@ -93,7 +93,7 @@ def sendEmail(toEmail,sub,content):
         else:
             print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
     except Exception as e:
-        print("[SendGrid Failed]: From: %s To: %s Subject: %s with Status Code: %d" %(congoEmail,toEmail,sub,response.status_code))
+        print("[SendGrid Failed]: From: %s To: %s Subject: %s" %(congoEmail,toEmail,sub))
         print(e)
 
 def putNewProduct(event):
@@ -119,6 +119,7 @@ def updateListing(event):
             "lastUpdatedTimestamp": datetime.datetime.utcnow()
         }
     })
+
 def putNewOrder(event):    
     newOrder = dict(event['args'])
     newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
@@ -128,7 +129,7 @@ def putNewOrder(event):
     #fetch image link to attach to obj in order to generate email body
     prodListing = products.find_one({"id": newOrder['prodID']})
     newOrder['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
-
+    del newOrder['_id']
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
     seller_content = generateNewOrderEmail(newOrder,False)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
@@ -142,7 +143,7 @@ def updateOrder(event):
     orders.update_one({'orderID': updatedOrder['orderID']},{
         "$set": {
             "orderStatus": updatedOrder['orderStatus'],
-            'lastUpdatedTimestamp': datetime.datetime.utcnow()
+            'lastUpdatedTimestamp': str(datetime.datetime.utcnow())
         }
     })
 
@@ -150,92 +151,42 @@ def updateOrder(event):
     if res is None:
         print("[Update Order]: Order id %d was not found" %updatedOrder['orderID'])
         return
-
     #fetch image from products to send out email.
     prodListing = products.find_one({"id": res['prodID']})
     res['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
-
     orderLoaded = dumpThenLoad(res)
-    print(orderLoaded)
+    del res['_id']
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
     buyer_content = generateNewOrderEmail(res,True)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],buyer_content)
     seller_content = generateNewOrderEmail(res,False)
     sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],seller_content)
 
-def generateNewOrderEmail(some_order,isBuyer):
-    #Setup Email Template
-    #load the file
-    email = None
-    #not sure if its more beneficial to do a deep copy of the template tree
-    with open("./email-template.html") as inf:
-        template = inf.read()
-        email = bs4.BeautifulSoup(template,features="html.parser")
-    if email is None:
-        print("[Email Service]: Problems opening email template file.")
-        return
 
+def generateNewOrderEmail(order,isBuyer):
+    some_order = dict(order)
+    #Shortening Eth Addresses
     formattedSellerAddress = "%s...%s" %(some_order['sellerAddress'][:6],some_order['sellerAddress'][-4:])
     formattedBuyerAddress = "%s...%s" %(some_order['buyerAddress'][:6],some_order['buyerAddress'][-4:])
-
     etherScanAddress = "ropsten.etherscan.io/address/" if NETWORK_ID == "3" else "etherscan.io/address/"
-    
     etherScanBuyerLink = etherScanAddress + some_order['buyerAddress']
     etherScanSellerLink = etherScanAddress + some_order['sellerAddress']
-
-    #generate a tags
-    buyer_a_tag = email.new_tag('a')
-    seller_a_tag = email.new_tag('a')
-    buyer_a_tag['href'] = etherScanBuyerLink
-    seller_a_tag['href'] = etherScanSellerLink
-    buyer_a_tag.append(formattedBuyerAddress)
-    seller_a_tag.append(formattedSellerAddress)
-
     #formatting wei to eth
     ethTotal = float(some_order['total']) / 10**18
     ethPrice = (float(some_order['total']) / float(some_order['quantity'])) / 10**18
-
-    email_summary = email.find("span",id="email-summary")
-    congo_type = email.find("td",id="congo-type")
-    buyer_email = email.find("td",id="buyer-email")
-    seller_email = email.find("td",id="seller-email")
-    timestamp = email.find("td",id="timestamp")
-    order_num = email.find("a",id="order-number")
-    quantity = email.find("td",id="quantity")
-    price = email.find("span",id="price")
-    item_name = email.find("span",id="item-name")
-    item_photo = email.find('img',id="item-photo")
-    total = email.find("td",id="total")
-    order_status = email.find("td",id="order-status")
-    edit_button = email.find("a",id="edit-button")
-
-    #added link to view orders page
-    order_num['href'] = ORDERS_URL
-    #add link to view listings
-    edit_button['href'] = LISTINGS_URL + str(some_order['prodID'])
-    edit_button.append("VIEW ORDER" if isBuyer else "EDIT ORDER")
-    
-    email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
-    congo_type.append(some_order['congoType'])
-    item_photo['src'] = some_order['imageLink']
-    price.append('Ξ ')
-    price.append(str(ethPrice))
-    item_name.append(some_order['prodName'])
-    quantity.append("Quantity ")
-    quantity.append(str(some_order['quantity']))
-    order_num.append(str(some_order['orderID']))
-    timestamp.append(str(some_order['listingTimestamp']))
-    seller_email.append(some_order['sellerContactDetails'])
-    seller_email.append(email.new_tag('br'))
-    seller_email.append(seller_a_tag)
-    buyer_email.append(some_order['buyerContactDetails'])
-    buyer_email.append(email.new_tag('br'))
-    buyer_email.append(buyer_a_tag)
-    total.append('Ξ ')
-    total.append(str(ethTotal))
-    order_status.append(allStatuses[some_order['orderStatus']])
-    
-    return str(email)
+    # modify order obj to send to email template
+    some_order['emailSummary'] = ("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
+    some_order['total'] = float('%.15f' % (ethTotal))
+    some_order['isBuyer'] = isBuyer
+    some_order['buyerLink'] = etherScanBuyerLink
+    some_order['sellerLink'] = etherScanSellerLink
+    some_order['price'] = float('%.15f' %(ethPrice))
+    some_order['link'] = LISTINGS_URL + str(some_order['prodID'])
+    some_order['buyerAddress'] = formattedBuyerAddress
+    some_order['sellerAddress'] = formattedSellerAddress
+    some_order['orderStatus'] = allStatuses[some_order['orderStatus']]
+    print(some_order)
+    return some_order
 
 def eventMap(filters,poll_interval):
     print("started worker thread!")
@@ -354,6 +305,7 @@ def userListings():
     else:
         return abort(400)
 
+contract = getContract()
 serverStatusResult = client.Congo.command("serverStatus")
 startWorkers()
 print("Connected to Mongo Atlas:",serverStatusResult['host'])
