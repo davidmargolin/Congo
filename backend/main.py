@@ -15,7 +15,15 @@ from sendgrid.helpers.mail import Mail
 import bs4
 import re
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 load_dotenv()
+if (isProd):
+    sentry_sdk.init(
+        dsn=os.getenv('SENTRYDSN'),
+        integrations=[FlaskIntegration()]
+    )
 
 username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
@@ -27,12 +35,13 @@ BASE_URL = "https://congo-frontend.herokuapp.com"
 ORDERS_URL = BASE_URL + "/user/orders"
 LISTINGS_URL = BASE_URL + "/listing/"
 
-allStatuses = ["Listed","Processing","Shipped","Complete","Exception"]
+allStatuses = ["Created","Processing","Shipped","Complete","Exception"]
 statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
+
 
 app=Flask(__name__)
 CORS(app)
@@ -117,14 +126,12 @@ def putNewOrder(event):
 
     #fetch image link to attach to obj in order to generate email body
     prodListing = products.find_one({"id": newOrder['prodID']})
-    if(prodListing is None):
-        newOrder['imageLink'] = "" # default no pic
-    else:
-        newOrder['imageLink'] = prodListing['imageLink'] 
+    newOrder['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
+
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
     seller_content = generateNewOrderEmail(newOrder,False)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
-    newOrder['congoType'] = ("%s Your order is now processing!"% statusToEmoji[newOrder['orderStatus']])
+    newOrder['congoType'] = ("%s Your order was successfully created!"% statusToEmoji[newOrder['orderStatus']])
     buyer_content = generateNewOrderEmail(newOrder,True)
     sendEmail(newOrder['buyerContactDetails'],newOrder['congoType'],buyer_content)
 
@@ -145,18 +152,15 @@ def updateOrder(event):
 
     #fetch image from products to send out email.
     prodListing = products.find_one({"id": res['prodID']})
-    if(prodListing is None):
-        res['imageLink'] = "" # default no pic
-    else:
-        res['imageLink'] = prodListing['imageLink']
+    res['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
 
     orderLoaded = dumpThenLoad(res)
     print(orderLoaded)
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
-    content = generateNewOrderEmail(res,True)
-    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],content)
-    content = generateNewOrderEmail(res,False)
-    sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],content)
+    buyer_content = generateNewOrderEmail(res,True)
+    sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],buyer_content)
+    seller_content = generateNewOrderEmail(res,False)
+    sendEmail(orderLoaded['sellerContactDetails'],res['congoType'],seller_content)
 
 def generateNewOrderEmail(some_order,isBuyer):
     #Setup Email Template
@@ -173,9 +177,7 @@ def generateNewOrderEmail(some_order,isBuyer):
     formattedSellerAddress = "%s...%s" %(some_order['sellerAddress'][:6],some_order['sellerAddress'][-4:])
     formattedBuyerAddress = "%s...%s" %(some_order['buyerAddress'][:6],some_order['buyerAddress'][-4:])
 
-    etherScanAddress = "etherscan.io/address/" # assume main-net on init
-    if NETWORK_ID == "3":
-        etherScanAddress = "ropsten.etherscan.io/address/"
+    etherScanAddress = "ropsten.etherscan.io/address/" if NETWORK_ID == "3" else "etherscan.io/address/"
     
     etherScanBuyerLink = etherScanAddress + some_order['buyerAddress']
     etherScanSellerLink = etherScanAddress + some_order['sellerAddress']
@@ -210,10 +212,7 @@ def generateNewOrderEmail(some_order,isBuyer):
     order_num['href'] = ORDERS_URL
     #add link to view listings
     edit_button['href'] = LISTINGS_URL + str(some_order['prodID'])
-    if isBuyer:
-        edit_button.append("VIEW ORDER")
-    else:
-        edit_button.append("EDIT ORDER")
+    edit_button.append("VIEW ORDER" if isBuyer else "EDIT ORDER")
     
     email_summary.append("Order #%s Status Update: %s" %(some_order['orderID'],allStatuses[some_order['orderStatus']]))
     congo_type.append(some_order['congoType'])
