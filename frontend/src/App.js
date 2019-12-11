@@ -4,7 +4,6 @@ import Listing from "./pages/ListingPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import CreateListing from "./pages/CreateListingPage";
 import UserListings from "./pages/UserListings";
-import ConfirmationPage from "./pages/CreateListingPage/confirmation";
 import Ethereum from "./context/EthereumContext";
 import "./assets/globalStyles.css";
 import UserOrders from "./pages/UserOrders";
@@ -30,9 +29,6 @@ const App = () => {
             </Route>
             <Route exact path="/create-listing">
               <CreateListing />
-            </Route>
-            <Route exact path="/confirmation-page">
-              <ConfirmationPage />
             </Route>
             <Route path="/docs">
               <Docs />
