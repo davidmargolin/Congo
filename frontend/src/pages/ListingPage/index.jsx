@@ -95,11 +95,14 @@ const UserOrders = ({ orders }) => {
 
 const SellerOrders = ({ orders }) => {
   const [ordersVisible, setOrdersVisible] = useState(true);
-  const { chosenAccount, methods } = useContext(EthereumContext);
+  const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
 
   const updateOrderStatus = (id, status) => {
     methods.updateOrder(id, status).send({
       from: chosenAccount
+    })
+    .on('transactionHash', hash =>{
+      handleEvent();
     });
   };
   return (
@@ -190,12 +193,15 @@ const SellerOrders = ({ orders }) => {
 };
 
 const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
-  const { chosenAccount, methods } = useContext(EthereumContext);
+  const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
   const email = useRef();
   const makePurchase = () => {
     methods.createOrder(listingID, 1, "", email.current.value).send({
       from: chosenAccount,
       value: price
+    })
+    .on('transactionHash', hash =>{
+      handleEvent();
     });
   };
   if (sellerAddress === chosenAccount)

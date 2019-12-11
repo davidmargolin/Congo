@@ -15,12 +15,16 @@ const makeListing = (
   sellerEmail,
   accountInfo
 ) => {
-  const { chosenAccount, methods } = accountInfo;
+  const { chosenAccount, methods, handleEvent } = accountInfo;
 
   methods
     .createListing(quantity, price, details, name, imageURL, sellerEmail)
     .send({ from: chosenAccount })
-    .catch(error => {
+    .on('transactionHash', hash =>{
+      console.log(hash);
+      handleEvent();
+    })
+    .on('error', error => {
       console.log(error);
     });
 };

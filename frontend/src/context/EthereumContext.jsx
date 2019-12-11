@@ -60,7 +60,8 @@ const Ethereum = ({ children }) => {
       <EthereumContext.Provider
         value={{
           chosenAccount,
-          methods
+          methods,
+          handleEvent: () => window.alert("Your transaction has been confirmed. An email will be sent to notify you when your listing has been mined.")
         }}
       >
         <div
