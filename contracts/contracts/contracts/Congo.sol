@@ -4,7 +4,7 @@ contract Congo {
 	string public name;
 	uint public productCount;
 	uint public orderCount;
-	enum State {Listed,Processing,Shipped,Complete,Exception}
+	enum State {Paid,Processing,Shipped,Complete,Exception}
 	mapping(uint => Product) public products;
 	mapping(uint => Order) public orders;
 
@@ -231,7 +231,7 @@ contract Congo {
 			_notes,
 			_listing.sellerContactDetails,
 			_buyerContactDetails,
-			State.Listed
+			State.Paid
 		);
 		//transfer value.
 		address(seller).transfer(msg.value);
@@ -247,7 +247,7 @@ contract Congo {
 			_notes,
 			_listing.sellerContactDetails,
 			_buyerContactDetails,
-			State.Listed
+			State.Paid
 		);
 	}
 	//exposed function that allows seller to update orders

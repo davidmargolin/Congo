@@ -137,7 +137,7 @@ This function allows sellers to modify a listing once it has been created. Only 
 
 `enum State`:
 
-`0 -> Listed`
+`0 -> Paid`
 
 `1 -> Processing`
 
