@@ -19,11 +19,6 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 load_dotenv()
-if (isProd):
-    sentry_sdk.init(
-        dsn=os.getenv('SENTRYDSN'),
-        integrations=[FlaskIntegration()]
-    )
 
 username = os.getenv('ATLASUSER')
 password = os.getenv('ATLASPASS')
@@ -41,6 +36,12 @@ statusToEmoji = ["✏️","💸","🚚💨","📦", "⛔"]
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
 orders = client.Congo.orders
+
+if (isProd):
+    sentry_sdk.init(
+        dsn=os.getenv('SENTRYDSN'),
+        integrations=[FlaskIntegration()]
+    )
 
 
 app=Flask(__name__)
