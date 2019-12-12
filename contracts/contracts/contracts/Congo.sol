@@ -275,9 +275,9 @@ contract Congo {
 			address(_order.sellerAddress).transfer(_order.total);
 		} else {
 			address(_order.buyerAddress).transfer(_order.total);
+			Product memory _listing = products[_order.prodID];
+			updateQuantity(_order.prodID, _listing.quantity + _order.quantity);
 		}
-		Product memory _listing = products[_order.prodID];
-		updateQuantity(_order.prodID, _listing.quantity + _order.quantity);
 		//broadcast to listeners that an existing order has been updated.
 		emit orderUpdated(
 			_id,
