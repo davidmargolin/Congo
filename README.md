@@ -42,7 +42,7 @@ This function allows buyers and sellers to update their order status which is re
 
 **Requirements**:
 
-**callerAddress == sellerAddress**
+**callerAddress == sellerAddress || callerAddress == buyerAddress**
 
 `function updateOrder()`:
 
