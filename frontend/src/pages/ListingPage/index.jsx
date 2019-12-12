@@ -11,7 +11,7 @@ const getListing = (id, address) =>
   ).then(res => res.json());
 
 const UserOrders = ({ orders }) => {
-  const [ordersVisible, setOrdersVisible] = useState(false);
+  const [ordersVisible, setOrdersVisible] = useState(true);
   const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
 
   const cancelOrder = id => {
@@ -58,7 +58,7 @@ const UserOrders = ({ orders }) => {
               overflowX: "auto"
             }}
           >
-            <table style={{ minWidth: 800 }}>
+            <table style={{ minWidth: 900 }}>
               <thead>
                 <tr>
                   <th>Order ID</th>
@@ -88,7 +88,7 @@ const UserOrders = ({ orders }) => {
                       <td>{email}</td>
                       <td>{listingTimestamp}</td>
                       <td>
-                        {orderStatus == 0 && (
+                        {orderStatus === 0 && (
                           <button onClick={() => cancelOrder(orderID)}>
                             Cancel
                           </button>
@@ -185,7 +185,7 @@ const SellerOrders = ({ orders }) => {
                           <option key={orderStatus} value={orderStatus}>
                             {STATUSES[orderStatus]}
                           </option>
-                          {orderStatus == 0 && (
+                          {orderStatus === 0 && (
                             <>
                               <option key={1} value={1}>
                                 Ship
