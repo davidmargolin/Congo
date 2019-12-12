@@ -213,15 +213,22 @@ const SellerOrders = ({ orders }) => {
   );
 };
 
-const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
+const Purchase = ({
+  listingID,
+  price,
+  sellerAddress,
+  quantity: quantityAvail
+}) => {
   const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
   const email = useRef();
+  const quantity = useRef();
   const makePurchase = () => {
+    const quantInt = parseInt(quantity.current.value);
     methods
-      .createOrder(listingID, 1, "", email.current.value)
+      .createOrder(listingID, quantInt, "", email.current.value)
       .send({
         from: chosenAccount,
-        value: price
+        value: price * quantInt
       })
       .on("transactionHash", hash => {
         handleEvent();
@@ -229,7 +236,7 @@ const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
   };
   if (sellerAddress === chosenAccount)
     return "Purchasing is disabled on owned listings.";
-  else if (quantity === 0) return "None in stock.";
+  else if (quantityAvail === 0) return "None in stock.";
   else
     return (
       <form
@@ -251,9 +258,18 @@ const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
           <input
             id="buyerEmail"
             type="email"
-            style={{ marginRight: 12 }}
             ref={email}
             placeholder="Your email address..."
+            required
+          />
+          <input
+            id="quantity"
+            type="number"
+            min="1"
+            style={{ maxWidth: 40 }}
+            max={quantityAvail}
+            ref={quantity}
+            defaultValue={1}
             required
           />
           <button type="submit">Buy Now</button>
