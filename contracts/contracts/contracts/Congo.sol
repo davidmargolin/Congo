@@ -153,7 +153,6 @@ contract Congo {
 		//validate user's input
 		require(bytes(_name).length > 0,"Product name cannot be empty.");
 		require(_price > 0, "Product Price must be greater than zero");
-		require(_quantity > 0, "Product Quantity must be greater than zero");
 		require(bytes(_details).length > 0, "Product Details are empty");
 		require(_id <= productCount && _id > 0, "product id is invalid.");
 		require(bytes(_sellerContactDetails).length > 0, "Seller Contact Details are empty");
