@@ -4,7 +4,7 @@ contract Congo {
 	string public name;
 	uint public productCount;
 	uint public orderCount;
-	enum State {Paid,Processing,Shipped,Complete,Exception}
+	enum State {Processing,Shipped,Refunded,Canceled}
 	mapping(uint => Product) public products;
 	mapping(uint => Order) public orders;
 
@@ -231,10 +231,8 @@ contract Congo {
 			_notes,
 			_listing.sellerContactDetails,
 			_buyerContactDetails,
-			State.Paid
+			State.Processing
 		);
-		//transfer value.
-		address(seller).transfer(msg.value);
 		//broadcast to listeners that an existing product has been updated.
 		emit orderCreated(
 			orderCount,
@@ -247,7 +245,7 @@ contract Congo {
 			_notes,
 			_listing.sellerContactDetails,
 			_buyerContactDetails,
-			State.Paid
+			State.Processing
 		);
 	}
 	//exposed function that allows seller to update orders
@@ -258,17 +256,28 @@ contract Congo {
 	public payable{
 		//validate user's input
 		require(_id <= orderCount && _id > 0, "order id is invalid.");
-		require(uint(State.Exception) >= nextState,"invalid input state.");
+		require(uint(State.Canceled) >= nextState,"invalid input state.");
 		//get the order.
 		Order memory _order = orders[_id];
 		//check if caller has permission to edit
-		require(msg.sender == _order.sellerAddress,"Only the seller can modify the order status.");
-		//state should only move forwards
-		require(uint(_order.orderStatus) < nextState, "Order states can only move forwards.");
+		if (State(nextState) == State.Canceled){
+			require(msg.sender == _order.buyerAddress,"Only the buyer can cancel the order.");
+		}else{
+			require(msg.sender == _order.sellerAddress,"Only the seller can refund/ship the order.");
+		}
+		//state should only update if processing
+		require(_order.orderStatus == State.Processing, "Order must be in processing state to be updated.");
 		_order.orderStatus = State(nextState);
 		//update order struct in mapping
 		orders[_id] = _order;
-
+		//transfer value.
+		if (State(nextState) == State.Shipped) {
+			address(_order.sellerAddress).transfer(_order.total);
+		} else {
+			address(_order.buyerAddress).transfer(_order.total);
+			Product memory _listing = products[_order.prodID];
+			updateQuantity(_order.prodID, _listing.quantity + _order.quantity);
+		}
 		//broadcast to listeners that an existing order has been updated.
 		emit orderUpdated(
 			_id,
