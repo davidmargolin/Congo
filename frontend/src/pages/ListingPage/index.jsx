@@ -241,11 +241,8 @@ const Purchase = ({
     return (
       <form
         style={{
-          display: "flex",
-          flex: 1,
           flexDirection: "column",
           justifyContent: "space-evenly",
-          maxWidth: 800,
           marginTop: 30,
           marginBottom: 30
         }}
@@ -254,7 +251,13 @@ const Purchase = ({
           makePurchase();
         }}
       >
-        <div style={{ display: "flex" }}>
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            flexWrap: "wrap"
+          }}
+        >
           <input
             id="buyerEmail"
             type="email"
@@ -262,17 +265,21 @@ const Purchase = ({
             placeholder="Your email address..."
             required
           />
-          <input
-            id="quantity"
-            type="number"
-            min="1"
-            style={{ maxWidth: 40 }}
-            max={quantityAvail}
-            ref={quantity}
-            defaultValue={1}
-            required
-          />
-          <button type="submit">Buy Now</button>
+          <div style={{ alignItems: "center" }}>
+            <input
+              id="quantity"
+              type="number"
+              min="1"
+              style={{ maxWidth: 40 }}
+              max={quantityAvail}
+              ref={quantity}
+              defaultValue={1}
+              required
+            />
+            <button type="submit" style={{ marginLeft: 12 }}>
+              Buy Now
+            </button>
+          </div>
         </div>
         <span style={{ fontSize: 12 }}>
           *It is recommended to use a burner email and not your personal email.
