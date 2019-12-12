@@ -26,9 +26,7 @@ isProd = os.getenv('ENVIRONMENT') == "production"
 sendGridKey = os.getenv('SENDGRIDAPIKEY')
 congoEmail = "Congo-Exchange@no-reply.io"
 NETWORK_ID="3"
-BASE_URL = "https://congo-frontend.herokuapp.com"
-ORDERS_URL = BASE_URL + "/user/orders"
-LISTINGS_URL = BASE_URL + "/listing/"
+LISTINGS_URL = "https://www.congod.app/listing/"
 SENDGRID_TRANSACTIONAL_TEMPLATE_ID = "d-3119602fe60149fa846693a319301110"
 
 allStatuses = ["Processing","Shipped","Refunded","Canceled"]
