@@ -2,14 +2,7 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { EthereumContext } from "../../context/EthereumContext.jsx";
 
-const STATUSES = [
-  "Paid",
-  "Processing",
-  "Shipped",
-  "Complete",
-  "Exception"
-]
-
+const STATUSES = ["Processing", "Shipped", "Refunded", "Canceled"];
 const getListing = (id, address) =>
   fetch(
     `https://congo-mart.herokuapp.com/listing/${encodeURIComponent(
@@ -19,6 +12,18 @@ const getListing = (id, address) =>
 
 const UserOrders = ({ orders }) => {
   const [ordersVisible, setOrdersVisible] = useState(false);
+  const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
+
+  const cancelOrder = id => {
+    methods
+      .updateOrder(id, 3)
+      .send({
+        from: chosenAccount
+      })
+      .on("transactionHash", hash => {
+        handleEvent();
+      });
+  };
 
   return (
     orders.length > 0 && (
@@ -62,6 +67,7 @@ const UserOrders = ({ orders }) => {
                   <th>Quantity</th>
                   <th>Seller Email</th>
                   <th>Date</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -81,6 +87,13 @@ const UserOrders = ({ orders }) => {
                       <td>{quantity}</td>
                       <td>{email}</td>
                       <td>{listingTimestamp}</td>
+                      <td>
+                        {orderStatus == 0 && (
+                          <button onClick={() => cancelOrder(orderID)}>
+                            Cancel
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   )
                 )}
@@ -98,12 +111,14 @@ const SellerOrders = ({ orders }) => {
   const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
 
   const updateOrderStatus = (id, status) => {
-    methods.updateOrder(id, status).send({
-      from: chosenAccount
-    })
-    .on('transactionHash', hash =>{
-      handleEvent();
-    });
+    methods
+      .updateOrder(id, status)
+      .send({
+        from: chosenAccount
+      })
+      .on("transactionHash", hash => {
+        handleEvent();
+      });
   };
   return (
     orders.length > 0 && (
@@ -167,13 +182,19 @@ const SellerOrders = ({ orders }) => {
                             updateOrderStatus(orderID, e.target.value)
                           }
                         >
-                          {Array(4 - orderStatus + 1)
-                            .fill(0)
-                            .map((val, i) => (
-                              <option key={i} value={orderStatus + i}>
-                                {STATUSES[orderStatus + i]}
+                          <option key={orderStatus} value={orderStatus}>
+                            {STATUSES[orderStatus]}
+                          </option>
+                          {orderStatus == 0 && (
+                            <>
+                              <option key={1} value={1}>
+                                Ship
                               </option>
-                            ))}
+                              <option key={2} value={2}>
+                                Refund
+                              </option>
+                            </>
+                          )}
                         </select>
                       </td>
                       <td>{total / 1000000000000000000} ETH</td>
@@ -196,13 +217,15 @@ const Purchase = ({ listingID, price, sellerAddress, quantity }) => {
   const { chosenAccount, methods, handleEvent } = useContext(EthereumContext);
   const email = useRef();
   const makePurchase = () => {
-    methods.createOrder(listingID, 1, "", email.current.value).send({
-      from: chosenAccount,
-      value: price
-    })
-    .on('transactionHash', hash =>{
-      handleEvent();
-    });
+    methods
+      .createOrder(listingID, 1, "", email.current.value)
+      .send({
+        from: chosenAccount,
+        value: price
+      })
+      .on("transactionHash", hash => {
+        handleEvent();
+      });
   };
   if (sellerAddress === chosenAccount)
     return "Purchasing is disabled on owned listings.";

@@ -31,8 +31,8 @@ ORDERS_URL = BASE_URL + "/user/orders"
 LISTINGS_URL = BASE_URL + "/listing/"
 SENDGRID_TRANSACTIONAL_TEMPLATE_ID = "d-3119602fe60149fa846693a319301110"
 
-allStatuses = ["Paid","Processing","Shipped","Complete","Exception"]
-statusToEmoji = ["💸","🏭","🚚💨","📦", "⛔"]
+allStatuses = ["Processing","Shipped","Refunded","Canceled"]
+statusToEmoji = ["🏭", "🚚💨", "⛔", "❌"]
 
 client = MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-zaima.mongodb.net/test?retryWrites=true&w=majority&ssl_cert_reqs=CERT_NONE")
 products = client.Congo.products
@@ -102,6 +102,7 @@ def putNewProduct(event):
     print("creating new listing with id: ",newProduct['id'])
     #add ts
     newProduct['listingTimestamp'] = datetime.datetime.utcnow()
+    newProduct['_id'] = newProduct['id']
     print(newProduct)
     products.insert_one(newProduct)
 
@@ -109,7 +110,7 @@ def updateListing(event):
     # find an listing
     updatedListing = dict(event['args'])
     print("updating listing id: ",updatedListing['id'])
-    products.update_one({'id': updatedListing['id']},{
+    products.update_one({'_id': updatedListing['id']},{
         "$set": {
             "quantity": updatedListing['quantity'],
             "price": updatedListing['price'],
@@ -123,13 +124,13 @@ def updateListing(event):
 def putNewOrder(event):    
     newOrder = dict(event['args'])
     newOrder['listingTimestamp'] = str(datetime.datetime.utcnow())
+    newOrder['_id'] = newOrder['orderID']
     orders.insert_one(newOrder)
     print("created new order with id:",newOrder['orderID'])
 
     #fetch image link to attach to obj in order to generate email body
-    prodListing = products.find_one({"id": newOrder['prodID']})
+    prodListing = products.find_one({"_id": newOrder['prodID']})
     newOrder['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
-    del newOrder['_id']
     newOrder['congoType'] = ("%s It's time to ship a new order!"% statusToEmoji[newOrder['orderStatus']])
     seller_content = generateNewOrderEmail(newOrder,False)
     sendEmail(newOrder['sellerContactDetails'],newOrder['congoType'],seller_content)
@@ -140,22 +141,21 @@ def putNewOrder(event):
 def updateOrder(event):
     updatedOrder = dict(event['args'])
     print("updating order with id: ",updatedOrder['orderID'])
-    orders.update_one({'orderID': updatedOrder['orderID']},{
+    orders.update_one({'_id': updatedOrder['orderID']},{
         "$set": {
             "orderStatus": updatedOrder['orderStatus'],
             'lastUpdatedTimestamp': str(datetime.datetime.utcnow())
         }
     })
 
-    res = orders.find_one({"orderID": updatedOrder['orderID']})
+    res = orders.find_one({"_id": updatedOrder['orderID']})
     if res is None:
         print("[Update Order]: Order id %d was not found" %updatedOrder['orderID'])
         return
     #fetch image from products to send out email.
-    prodListing = products.find_one({"id": res['prodID']})
+    prodListing = products.find_one({"_id": res['prodID']})
     res['imageLink'] = prodListing['imageLink'] if prodListing is not None else "" # default no pic
     orderLoaded = dumpThenLoad(res)
-    del res['_id']
     res['congoType'] = ("%s Your order has updated!" % statusToEmoji[int(res['orderStatus'])])
     buyer_content = generateNewOrderEmail(res,True)
     sendEmail(orderLoaded['buyerContactDetails'],res['congoType'],buyer_content)

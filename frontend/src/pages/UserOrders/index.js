@@ -4,7 +4,9 @@ import { EthereumContext } from "../../context/EthereumContext";
 
 const getListingsByOwner = owner =>
   fetch(
-    `https://congo-mart.herokuapp.com/user/orders?buyer=${encodeURIComponent(owner)}`
+    `https://congo-mart.herokuapp.com/user/orders?buyer=${encodeURIComponent(
+      owner
+    )}`
   ).then(res => res.json());
 
 const UserOrders = () => {
@@ -25,7 +27,7 @@ const UserOrders = () => {
         flexDirection: "column"
       }}
     >
-      <p>{listings.length>0?"Your Orders:":"No orders found"}</p>
+      <p>{listings.length > 0 ? "Your Orders:" : "No orders found"}</p>
 
       <div
         style={{
